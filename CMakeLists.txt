@@ -13,13 +13,11 @@ file(GLOB SRC
         src/*.cc
         src/*.h
         src/*.S
-        lib/*.cc
-        lib/*.h
-        lib/*.S)
+        )
 
-add_executable(gumsmaqqer ${SRC})
+add_executable(gumsmaqqer ${SRC} lib/io.h)
 
 if (WIN32)
 else ()
-    target_compile_options(gumsmaqqer PRIVATE -Wall -Wextra -Wundef -march=native -Wno-unused-parameter -Wno-unused-variable)
+    target_compile_options(gumsmaqqer PRIVATE -Wall -Wextra -Wundef -march=native -Wno-missing-field-initializers -Wno-sign-compare)
 endif ()

@@ -1,11 +1,11 @@
 #include "image.h"
+#include "../lib/io.h"
 // clang-format off
 #define STB_IMAGE_IMPLEMENTATION
 #include "../lib/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../lib/stb_image_write.h"
 // clang-format on
-#include "../lib/io.h"
 
 #include <cstdlib>
 
