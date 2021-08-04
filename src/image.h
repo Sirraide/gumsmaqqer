@@ -34,6 +34,8 @@ struct image {
 	void WriteAtIfAlpha(int at_x, int at_y, const image& rows) const asm("WriteIfAlpha");
 	void alpha(data_t opacity = 255);
 
+	void checksize();
+
 	[[nodiscard]] pixel* begin() const;
 	[[nodiscard]] pixel* end() const;
 

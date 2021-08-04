@@ -253,5 +253,5 @@ const std::unordered_map<std::wstring, wchar_t> abbr_gumsmaq_table = {
 	{L"bsNOT_FOOD", static_cast<wchar_t>(Gumsmaq::bowl_with_spoon)},
 	{L"tbNOT_FOOD", static_cast<wchar_t>(Gumsmaq::takeout_box)},
 	{L"CHOP", static_cast<wchar_t>(Gumsmaq::chopsticks)},
-	{L"NHCL", static_cast<wchar_t>(Gumsmaq::salt)},
+	{L"NACL", static_cast<wchar_t>(Gumsmaq::salt)},
 };

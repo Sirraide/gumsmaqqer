@@ -126,23 +126,34 @@ image Paragraph(const vector_t& groups) {
 	vector<vector<image>> blocks;
 	vector<image>		  current_block;
 	for (const auto& group : groups) {
-		int chars_available = !remaining_lines ? 0 : remaining_lines * (max_count - 1) + 1;
-		if (chars_available >= group.second) {
-			chars_available = chars_available - group.second;
+		if (group.second < 1) {
+			wcerr << "Warning: group '" << group.first << to_wstring(group.second)
+				  << "' is empty and was skipped\n";
+			continue;
+		}
+		if(remaining_lines <= 0) {
+			blocks.push_back(current_block);
+			current_block.clear();
+			remaining_lines = 10;
+		}
+		int chars_available = !remaining_lines ? 0 : remaining_lines * (max_count - 1);
+		if (chars_available + 1 >= group.second) {
+			/// this part is the worst...
+			int line_diff = group.second / (max_count - 1);
+			if (group.second == 1) line_diff = 1;
+			else if (int mod = group.second - 1; group.second % 9 && mod > 0 && mod % 9)
+				line_diff++;
+			remaining_lines -= line_diff;
 
-			/// reminder: a ‘line’ is  what looks like 2 lines stacked on top of one another, each containing
-			/// max_count / 2 or max_count / 2 - 1 elements
-			remaining_lines = chars_available / (max_count - 1)
-							  + !!(chars_available % (max_count - 1));
 			current_block.push_back(LetterGroup(group));
 		} else {
 			if (chars_available)
-				current_block.push_back(LetterGroup({group.first, chars_available}));
+				current_block.push_back(LetterGroup({group.first, chars_available + 1}));
 
 			blocks.push_back(current_block);
 			current_block.clear();
 
-			int letters_to_print		  = group.second - chars_available;
+			int letters_to_print		  = group.second - chars_available - 1;
 			int letters_in_indented_block = gumsmaq_max_line_count * (max_count - 1);
 			if (letters_to_print >= letters_in_indented_block)
 				do {
@@ -155,17 +166,26 @@ image Paragraph(const vector_t& groups) {
 
 			if (letters_to_print) {
 				current_block.push_back(LetterGroup({group.first, letters_to_print}, chars_available));
-				remaining_lines = gumsmaq_max_line_count - (letters_to_print / (max_count - 1))
-								  - !!(letters_to_print % (max_count - 1));
+				/// ... and this part ...
+				int line_diff = letters_to_print / (max_count - 1);
+				if (letters_to_print == 1) line_diff = 1;
+				else if (int mod = letters_to_print - 1; letters_to_print % 9 && mod > 0 && mod % 9)
+					line_diff++;
+				remaining_lines = gumsmaq_max_line_count - line_diff;
 			} else
-				remaining_lines = max_count;
+				remaining_lines = gumsmaq_max_line_count;
 		}
 	}
-	if (remaining_lines != max_count) blocks.push_back(current_block);
+	if (!current_block.empty())
+		blocks.push_back(current_block);
 
-	int	  bsiz = blocks.size();
-	image img{bsiz * GUMSMAQ_LINE_WIDTH + (bsiz - 1) * gumsmaq_inter_block_space,
-		gumsmaq_max_line_count * GUMSMAQ_LINE_HEIGHT};
+	int bsiz = blocks.size();
+	int ht	 = 0;
+	if (blocks.size() == 1)
+		for (const auto& block : blocks[0]) ht += block.height;
+	else
+		ht = gumsmaq_max_line_count * GUMSMAQ_LINE_HEIGHT;
+	image img{bsiz * GUMSMAQ_LINE_WIDTH + (bsiz - 1) * gumsmaq_inter_block_space, ht};
 
 	int x = 0;
 	for (const auto& block : blocks) {

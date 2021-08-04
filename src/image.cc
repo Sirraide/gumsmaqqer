@@ -14,11 +14,13 @@ image::image(const std::string& filename) {
 	if (data = stbi_load(filename.c_str(), &width, &height, &channels, 0), !data)
 		throw std::runtime_error("Could not load image from file '" + filename + "'");
 	size = width * height * channels;
+	checksize();
 }
 image::image(int _width, int _height, int _channels) : width(_width), height(_height), channels(_channels) {
 	size  = width * height * channels;
 	alloc = true;
 	data  = static_cast<data_t*>(calloc(size, 1));
+	checksize();
 }
 
 image::image(const image& other) : image(other.width, other.height) {
@@ -27,6 +29,7 @@ image::image(const image& other) : image(other.width, other.height) {
 
 image::image(image&& other) noexcept {
 	*this = move(other);
+	checksize();
 }
 
 image& image::operator=(const image& other) {
@@ -110,4 +113,6 @@ void image::WriteAtIfAlpha(int at_x, int at_y, const image& img) const {
 	int	   m_height	   = min(height - at_y, img.height);
 	CXX_WriteIfAlpha(img_data, where_start, img.width, width, m_height);
 }
-
+void image::checksize() {
+	if(size < 0) throw std::runtime_error("Image size may not be less than zero!");
+}
