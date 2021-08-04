@@ -1,12 +1,7 @@
-#include "emojis.h"
-#include "image.h"
 #include "renderer.h"
 #include "utils.h"
 
 #include <clocale>
-#include <iostream>
-#include <sstream>
-#include <string>
 
 using namespace std;
 
@@ -19,7 +14,7 @@ int gumsmaq_inter_block_space	   = 15;
 int main(void) {
 	setlocale(LC_ALL, "");
 
-	auto gumsmaq = Gumsmaq::VectorFromAbbr(L"L91T91NACL1");
+	auto gumsmaq = Gumsmaq::VectorFromAbbr(L"L11T91NACL1");
 	auto img	 = Gumsmaq::Paragraph(gumsmaq);
 	img.save("test.png");
 }

@@ -1,12 +1,13 @@
 #include "image.h"
+// clang-format off
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
+#include "../lib/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "io.h"
+#include "../lib/stb_image_write.h"
+// clang-format on
+#include "../lib/io.h"
 
 #include <cstdlib>
-#include <immintrin.h>
-#include <stb/stb_image_write.h>
 
 using namespace std;
 image::image(const std::string& filename) {
@@ -37,10 +38,10 @@ image& image::operator=(const image& other) {
 	*this = move(copy);
 	return *this;
 }
-image& image::operator=(image&& other)  noexcept {
-	width = other.width;
-	height = other.height;
-	channels = other.channels;
+image& image::operator=(image&& other) noexcept {
+	width	   = other.width;
+	height	   = other.height;
+	channels   = other.channels;
 	data	   = other.data;
 	other.data = nullptr;
 	return *this;
@@ -113,6 +114,6 @@ void image::WriteAtIfAlpha(int at_x, int at_y, const image& img) const {
 	int	   m_height	   = min(height - at_y, img.height);
 	CXX_WriteIfAlpha(img_data, where_start, img.width, width, m_height);
 }
-void image::checksize() {
-	if(size < 0) throw std::runtime_error("Image size may not be less than zero!");
+void image::checksize() const {
+	if (size < 0) throw std::runtime_error("Image size may not be less than zero!");
 }

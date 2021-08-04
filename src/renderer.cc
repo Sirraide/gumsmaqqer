@@ -46,7 +46,11 @@ wstring VectorToUnicode(const vector_t& gumsmaq) {
 
 const image& LoadLetter(const wstring& which) {
 	static unordered_map<wstring, image> cached_letters;
-	static const string					 img_root = "twemoji/assets/72x72/";
+#ifdef WIN32
+	static const string img_root = "twemoji\\assets\\72x72\\";
+#else
+	static const string img_root = "twemoji/assets/72x72/";
+#endif
 	if (!cached_letters.contains(which)) {
 		if (!abbr_gumsmaq_table.contains(which)) {
 			wcerr << L"Error: '" << which << L"' is not valid gumsmaq. Aborted";
@@ -131,7 +135,7 @@ image Paragraph(const vector_t& groups) {
 				  << "' is empty and was skipped\n";
 			continue;
 		}
-		if(remaining_lines <= 0) {
+		if (remaining_lines <= 0) {
 			blocks.push_back(current_block);
 			current_block.clear();
 			remaining_lines = 10;

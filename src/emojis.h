@@ -1,138 +1,146 @@
 #ifndef GUMSMAQQER_EMOJIS_H
 #define GUMSMAQQER_EMOJIS_H
+#include <iostream>
 #include <string>
 #include <unordered_map>
-#include <iostream>
+
+#ifdef WIN32
+#	define wchar_type_t char32_t
+#else
+#	define wchar_type_t wchar_t
+#endif
 
 namespace Gumsmaq {
-enum : wchar_t {
-	green_apple			= L'🍏',
-	apple				= L'🍎',
-	pear				= L'🍐',
-	tangerine			= L'🍊',
-	lemon				= L'🍋',
-	banana				= L'🍌',
-	watermelon			= L'🍉',
-	grapes				= L'🍇',
-	blueberries			= L'🫐',
-	strawberry			= L'🍓',
-	melon				= L'🍈',
-	cherries			= L'🍒',
-	peach				= L'🍑',
-	mango				= L'🥭',
-	pineapple			= L'🍍',
-	coconut				= L'🥥',
-	kiwi				= L'🥝',
-	tomato				= L'🍅',
-	eggplant			= L'🍆',
-	avocado				= L'🥑',
-	olive				= L'🫒',
-	broccoli			= L'🥦',
-	leafy_green			= L'🥬',
-	bell_pepper			= L'🫑',
-	cucumber			= L'🥒',
-	hot_pepper			= L'🌶',
-	corn				= L'🌽',
-	carrot				= L'🥕',
-	garlic				= L'🧄',
-	onion				= L'🧅',
-	potato				= L'🥔',
-	sweet_potato		= L'🍠',
-	croissant			= L'🥐',
-	bagel				= L'🥯',
-	bread				= L'🍞',
-	french_bread		= L'🥖',
-	flatbread			= L'🫓',
-	pretzel				= L'🥨',
-	cheese				= L'🧀',
-	egg					= L'🥚',
-	cooking				= L'🍳',
-	butter				= L'🧈',
-	pancakes			= L'🥞',
-	waffle				= L'🧇',
-	bacon				= L'🥓',
-	cut_of_meat			= L'🥩',
-	poultry_leg			= L'🍗',
-	meat_on_bone		= L'🍖',
-	hotdog				= L'🌭',
-	hamburger			= L'🍔',
-	fries				= L'🍟',
-	pizza				= L'🍕',
-	sandwich			= L'🥪',
-	stuffed_flatbread	= L'🥙',
-	falafel				= L'🧆',
-	taco				= L'🌮',
-	burrito				= L'🌯',
-	tamale				= L'🫔',
-	salad				= L'🥗',
-	shallow_pan_of_food = L'🥘',
-	fondue				= L'🫕',
-	canned_food			= L'🥫',
-	spaghetti			= L'🍝',
-	ramen				= L'🍜',
-	stew				= L'🍲',
-	curry				= L'🍛',
-	sushi				= L'🍣',
-	bento				= L'🍱',
-	dumpling			= L'🥟',
-	oyster				= L'🦪',
-	fried_shrimp		= L'🍤',
-	rice_ball			= L'🍙',
-	rice				= L'🍚',
-	rice_cracker		= L'🍘',
-	fish_cake			= L'🍥',
-	fortune_cookie		= L'🥠',
-	moon_cake			= L'🥮',
-	oden				= L'🍢',
-	dango				= L'🍡',
-	shaved_ice			= L'🍧',
-	ice_cream			= L'🍨',
-	icecream			= L'🍦',
-	pie					= L'🥧',
-	cupcake				= L'🧁',
-	cake				= L'🍰',
-	birthday			= L'🎂',
-	custard				= L'🍮',
-	lollipop			= L'🍭',
-	candy				= L'🍬',
-	chocolate_bar		= L'🍫',
-	popcorn				= L'🍿',
-	doughnut			= L'🍩',
-	cookie				= L'🍪',
-	chestnut			= L'🌰',
-	peanuts				= L'🥜',
-	honey_pot			= L'🍯',
-	milk				= L'🥛',
-	baby_bottle			= L'🍼',
-	coffee				= L'☕',
-	tea					= L'🍵',
-	teapot				= L'🫖',
-	mate				= L'🧉',
-	bubble_tea			= L'🧋',
-	beverage_box		= L'🧃',
-	cup_with_straw		= L'🥤',
-	sake				= L'🍶',
-	beer				= L'🍺',
-	beers				= L'🍻',
-	champagne_glass		= L'🥂',
-	wine_glass			= L'🍷',
-	tumbler_glass		= L'🥃',
-	cocktail			= L'🍸',
-	tropical_drink		= L'🍹',
-	champagne			= L'🍾',
-	ice_cube			= L'🧊',
-	spoon				= L'🥄',
-	fork_and_knife		= L'🍴',
-	fork_knife_plate	= L'🍽',
-	bowl_with_spoon		= L'🥣',
-	takeout_box			= L'🥡',
-	chopsticks			= L'🥢',
-	salt				= L'🧂',
+enum : wchar_type_t {
+	green_apple			= 127823, // L'🍏'
+	apple				= 127822, // L'🍎'
+	pear				= 127824, // L'🍐'
+	tangerine			= 127818, // L'🍊'
+	lemon				= 127819, // L'🍋'
+	banana				= 127820, // L'🍌'
+	watermelon			= 127817, // L'🍉'
+	grapes				= 127815, // L'🍇'
+	blueberries			= 129744, // L'🫐'
+	strawberry			= 127827, // L'🍓'
+	melon				= 127816, // L'🍈'
+	cherries			= 127826, // L'🍒'
+	peach				= 127825, // L'🍑'
+	mango				= 129389, // L'🥭'
+	pineapple			= 127821, // L'🍍'
+	coconut				= 129381, // L'🥥'
+	kiwi				= 129373, // L'🥝'
+	tomato				= 127813, // L'🍅'
+	eggplant			= 127814, // L'🍆'
+	avocado				= 129361, // L'🥑'
+	olive				= 129746, // L'🫒'
+	broccoli			= 129382, // L'🥦'
+	leafy_green			= 129388, // L'🥬'
+	bell_pepper			= 129745, // L'🫑'
+	cucumber			= 129362, // L'🥒'
+	hot_pepper			= 127798, // L'🌶'
+	corn				= 127805, // L'🌽'
+	carrot				= 129365, // L'🥕'
+	garlic				= 129476, // L'🧄'
+	onion				= 129477, // L'🧅'
+	potato				= 129364, // L'🥔'
+	sweet_potato		= 127840, // L'🍠'
+	croissant			= 129360, // L'🥐'
+	bagel				= 129391, // L'🥯'
+	bread				= 127838, // L'🍞'
+	french_bread		= 129366, // L'🥖'
+	flatbread			= 129747, // L'🫓'
+	pretzel				= 129384, // L'🥨'
+	cheese				= 129472, // L'🧀'
+	egg					= 129370, // L'🥚'
+	cooking				= 127859, // L'🍳'
+	butter				= 129480, // L'🧈'
+	pancakes			= 129374, // L'🥞'
+	waffle				= 129479, // L'🧇'
+	bacon				= 129363, // L'🥓'
+	cut_of_meat			= 129385, // L'🥩'
+	poultry_leg			= 127831, // L'🍗'
+	meat_on_bone		= 127830, // L'🍖'
+	hotdog				= 127789, // L'🌭'
+	hamburger			= 127828, // L'🍔'
+	fries				= 127839, // L'🍟'
+	pizza				= 127829, // L'🍕'
+	sandwich			= 129386, // L'🥪'
+	stuffed_flatbread	= 129369, // L'🥙'
+	falafel				= 129478, // L'🧆'
+	taco				= 127790, // L'🌮'
+	burrito				= 127791, // L'🌯'
+	tamale				= 129748, // L'🫔'
+	salad				= 129367, // L'🥗'
+	shallow_pan_of_food = 129368, // L'🥘'
+	fondue				= 129749, // L'🫕'
+	canned_food			= 129387, // L'🥫'
+	spaghetti			= 127837, // L'🍝'
+	ramen				= 127836, // L'🍜'
+	stew				= 127858, // L'🍲'
+	curry				= 127835, // L'🍛'
+	sushi				= 127843, // L'🍣'
+	bento				= 127857, // L'🍱'
+	dumpling			= 129375, // L'🥟'
+	oyster				= 129450, // L'🦪'
+	fried_shrimp		= 127844, // L'🍤'
+	rice_ball			= 127833, // L'🍙'
+	rice				= 127834, // L'🍚'
+	rice_cracker		= 127832, // L'🍘'
+	fish_cake			= 127845, // L'🍥'
+	fortune_cookie		= 129376, // L'🥠'
+	moon_cake			= 129390, // L'🥮'
+	oden				= 127842, // L'🍢'
+	dango				= 127841, // L'🍡'
+	shaved_ice			= 127847, // L'🍧'
+	ice_cream			= 127848, // L'🍨'
+	icecream			= 127846, // L'🍦'
+	pie					= 129383, // L'🥧'
+	cupcake				= 129473, // L'🧁'
+	cake				= 127856, // L'🍰'
+	birthday			= 127874, // L'🎂'
+	custard				= 127854, // L'🍮'
+	lollipop			= 127853, // L'🍭'
+	candy				= 127852, // L'🍬'
+	chocolate_bar		= 127851, // L'🍫'
+	popcorn				= 127871, // L'🍿'
+	doughnut			= 127849, // L'🍩'
+	cookie				= 127850, // L'🍪'
+	chestnut			= 127792, // L'🌰'
+	peanuts				= 129372, // L'🥜'
+	honey_pot			= 127855, // L'🍯'
+	milk				= 129371, // L'🥛'
+	baby_bottle			= 127868, // L'🍼'
+	coffee				= 9749,	  // L'☕'
+	tea					= 127861, // L'🍵'
+	teapot				= 129750, // L'🫖'
+	mate				= 129481, // L'🧉'
+	bubble_tea			= 129483, // L'🧋'
+	beverage_box		= 129475, // L'🧃'
+	cup_with_straw		= 129380, // L'🥤'
+	sake				= 127862, // L'🍶'
+	beer				= 127866, // L'🍺'
+	beers				= 127867, // L'🍻'
+	champagne_glass		= 129346, // L'🥂'
+	wine_glass			= 127863, // L'🍷'
+	tumbler_glass		= 129347, // L'🥃'
+	cocktail			= 127864, // L'🍸'
+	tropical_drink		= 127865, // L'🍹'
+	champagne			= 127870, // L'🍾'
+	ice_cube			= 129482, // L'🧊'
+	spoon				= 129348, // L'🥄'
+	fork_and_knife		= 127860, // L'🍴'
+	fork_knife_plate	= 127869, // L'🍽'
+	bowl_with_spoon		= 129379, // L'🥣'
+	takeout_box			= 129377, // L'🥡'
+	chopsticks			= 129378, // L'🥢'
+	salt				= 129474, // L'🧂'
 };
 
 }
 
-extern const std::unordered_map<std::wstring, wchar_t> name_gumsmaq_table;
-extern const std::unordered_map<std::wstring, wchar_t> abbr_gumsmaq_table;
+extern const std::unordered_map<std::wstring, wchar_t>		name_gumsmaq_table;
+extern const std::unordered_map<std::wstring, wchar_type_t> abbr_gumsmaq_table;
+
+#undef wchar_type_t
 
 #endif // GUMSMAQQER_EMOJIS_H

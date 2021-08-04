@@ -6,13 +6,23 @@
 
 using data_t = unsigned char;
 
-struct __attribute__((packed)) pixel {
+#ifdef WIN32
+#	define PACKED
+__pragma(pack(push, 1))
+#else
+#	define PACKED __attribute__((packed))
+#endif
+	struct PACKED pixel {
 	data_t r;
 	data_t g;
 	data_t b;
 	data_t a;
 };
-static_assert(sizeof(pixel) == 4 * sizeof(data_t));
+#ifdef WIN32
+__pragma(pack(pop))
+#endif
+
+	static_assert(sizeof(pixel) == 4 * sizeof(data_t));
 
 struct image {
 	int		width{};
@@ -26,15 +36,15 @@ struct image {
 	explicit image(int width = 0, int height = 0, int channels = 4);
 	image(const image& other);
 	image(image&& other) noexcept;
-	image&  operator=(const image& other);
+	image& operator=(const image& other);
 	image& operator=(image&& other) noexcept;
 
 	void save(const std::string& filename) const;
 	void WriteAt(int at_x, int at_y, const image& rows);
-	void WriteAtIfAlpha(int at_x, int at_y, const image& rows) const asm("WriteIfAlpha");
+	void WriteAtIfAlpha(int at_x, int at_y, const image& rows) const;
 	void alpha(data_t opacity = 255);
 
-	void checksize();
+	void checksize() const;
 
 	[[nodiscard]] pixel* begin() const;
 	[[nodiscard]] pixel* end() const;

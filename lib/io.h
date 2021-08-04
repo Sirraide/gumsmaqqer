@@ -1,19 +1,19 @@
-#ifndef TEXPP_IO_H
-#define TEXPP_IO_H
-
 #ifndef LIBIO_FILE_H
-#	define LIBIO_FILE_H
 
-#	include <cstdio>
-#	include <fcntl.h>
-#	include <functional>
-#	include <iostream>
+#define LIBIO_FILE_H
+
+#include <cstdio>
+#include <fcntl.h>
+#include <functional>
+#include <iostream>
+#ifndef WIN32
 #	include <sys/io.h>
 #	include <sys/mman.h>
 #	include <sys/stat.h>
 #	include <sys/types.h>
 #	include <unistd.h>
-#	include <vector>
+#endif
+#include <vector>
 
 namespace io {
 
@@ -38,7 +38,11 @@ enum rd {
 	lines
 };
 
+#ifdef WIN32
+inline std::string __fmode_to_str(filemode mode) noexcept {
+#else
 inline std::string_view __fmode_to_str(filemode mode) noexcept {
+#endif
 	switch (mode) {
 		case filemode::r: return "r";
 		case filemode::rb: return "rb";
@@ -67,26 +71,26 @@ struct file {
 	using string_t = std::basic_string<char_type_t>;
 	using file_t   = file<char_type_t, M>;
 
-	FILE		 *handle = nullptr;
+	FILE*		handle = nullptr;
 	std::string filename;
-	filemode	mode	  = M;
-	rd			rdmode	  = rd::words;
+	filemode	mode   = M;
+	rd			rdmode = rd::words;
 
 	/// Opens a file and constructs a wrapper around it. on_error(this) is called should the file fail to open.
 	explicit file(std::string filename_, std::function<void(const std::string&)> on_error = {}) noexcept : filename(move(filename_)) {
-		handle = fopen(filename.c_str(), __fmode_to_str(M).begin());
+		handle = fopen(filename.c_str(), __fmode_to_str(M).data());
 		if (!handle) on_error(filename);
 	}
 
-	file(FILE *&&_handle, std::string _filename, filemode _mode) noexcept : filename(std::move(_filename)), mode(_mode), handle(_handle) {
+	file(FILE*&& _handle, std::string _filename, filemode _mode) noexcept : filename(std::move(_filename)), mode(_mode), handle(_handle) {
 		_handle = nullptr;
 	}
 
 	explicit file()			= default;
-	file(const file &other) = delete;
-	void operator=(const file &other) = delete;
+	file(const file& other) = delete;
+	void operator=(const file& other) = delete;
 
-	file(file &&other) noexcept {
+	file(file&& other) noexcept {
 		handle		 = other.handle;
 		filename	 = other.filename;
 		mode		 = other.mode;
@@ -94,20 +98,20 @@ struct file {
 		other.filename.clear();
 	}
 
+#ifndef WIN32
 	/// Map the entire file into memory
-	/// TODO: disable on windows;
 	/// TODO: mmap directly into string in case of regular char's
 	/// TODO: separate file_map wrapper w/ read/write capabilities
 	auto mmap() noexcept -> string_t requires Readable<M> {
 		struct stat s {};
 		int			d = fd();
 		fstat(d, &s);
-		char		 *mem;
-		char_type_t *ptr;
-		mem = (char *) ::mmap(nullptr, size_t(s.st_size), PROT_READ, MAP_PRIVATE, d, 0);
+		char*		 mem;
+		char_type_t* ptr;
+		mem = (char*) ::mmap(nullptr, size_t(s.st_size), PROT_READ, MAP_PRIVATE, d, 0);
 		if constexpr (std::is_same_v<char_type_t, char>) ptr = mem;
 		if constexpr (std::is_same_v<char_type_t, wchar_t>) {
-			ptr = (wchar_t *) calloc(s.st_size, sizeof(wchar_t));
+			ptr = (wchar_t*) calloc(s.st_size, sizeof(wchar_t));
 			mbstowcs(ptr, mem, s.st_size);
 		}
 		string_t ret{ptr};
@@ -115,6 +119,10 @@ struct file {
 		if constexpr (std::is_same_v<char_type_t, wchar_t>) free(ptr);
 		return ret;
 	}
+#else
+	auto ReadToEnd() noexcept -> string_t;
+	auto mmap() noexcept -> string_t requires Readable<M> { return ReadToEnd(); }
+#endif
 
 	/// Read up to n bytes from the file.
 	auto raw(size_t n) noexcept -> std::string requires Readable<M> {
@@ -140,7 +148,7 @@ struct file {
 	}
 
 	/// Read from the file until condition is true.
-	auto ReadUntil(const std::function<bool(char_type_t)> &condition) noexcept
+	auto ReadUntil(const std::function<bool(char_type_t)>& condition) noexcept
 		-> string_t requires Readable<M> {
 		string_t str;
 		if (!eof())
@@ -205,7 +213,7 @@ struct file {
 
 	/// Format and write a string to the file.
 	template <typename... Args>
-	void writef(const string_t &format, Args... args) requires Writable<M> {
+	void writef(const string_t& format, Args... args) requires Writable<M> {
 		if constexpr (std::is_same_v<char_type_t, char>)
 			::fprintf(handle, format.c_str(), std::forward<Args>(args)...);
 		if constexpr (std::is_same_v<char_type_t, wchar_t>)
@@ -230,33 +238,33 @@ struct file {
 	[[nodiscard]] explicit inline operator bool() const noexcept { return handle; }
 
 	/// Write c to this file
-	file_t &operator<<(char_type_t c) requires Writable<M> {
+	file_t& operator<<(char_type_t c) requires Writable<M> {
 		write(c);
 		return *this;
 	}
 
 	/// Write str to this file
-	file_t &operator<<(const string_t &str) requires Writable<M> {
+	file_t& operator<<(const string_t& str) requires Writable<M> {
 		write(str);
 		return *this;
 	}
 
 	/// Write the contents of other to this file
 	template <filemode N>
-	file_t &operator<<(file<char_type_t, N> &other) requires Writable<M> && Readable<N> {
+	file_t& operator<<(file<char_type_t, N>& other) requires Writable<M> && Readable<N> {
 		write(other.mmap());
 		return *this;
 	}
 
 	/// Write the contents of this file to other
 	template <filemode N>
-	file_t &operator>>(file<char_type_t, N> &other) requires Readable<M> && Writable<N> {
+	file_t& operator>>(file<char_type_t, N>& other) requires Readable<M> && Writable<N> {
 		other.write(mmap());
 		return *this;
 	}
 
 	/// Read a word or line from this file into buf, depending on rdmode
-	file_t &operator>>(string_t &buf) requires Readable<M> {
+	file_t& operator>>(string_t& buf) requires Readable<M> {
 		if (rdmode == rd::words) [[likely]]
 			buf = readword();
 		else [[unlikely]]
@@ -265,13 +273,13 @@ struct file {
 	}
 
 	/// Read a character from this file into buf
-	file_t &operator>>(char_type_t &c) requires Readable<M> {
+	file_t& operator>>(char_type_t& c) requires Readable<M> {
 		c = read();
 		return *this;
 	}
 
 	/// Change the read mode for this file
-	file_t &operator>>(rd _rdmode) requires Readable<M> {
+	file_t& operator>>(rd _rdmode) requires Readable<M> {
 		rdmode = _rdmode;
 		return *this;
 	}
@@ -283,11 +291,11 @@ struct file {
 	template <typename Container>
 	struct abstract_iterator {
 		using iterator = typename Container::iterator;
-		file_t   *fptr;
+		file_t*	  fptr;
 		long	  tell;
 		Container elements;
 
-		abstract_iterator(file_t *_fptr) : fptr(_fptr), tell(_fptr->tell()) {}
+		abstract_iterator(file_t* _fptr) : fptr(_fptr), tell(_fptr->tell()) {}
 		~abstract_iterator() { fptr->seek(tell, SEEK_SET); }
 
 		virtual iterator begin() = 0;
@@ -344,7 +352,7 @@ inline void perror_and_exit(const std::string& filename) {
 
 } // namespace io
 
-#	if 0
+#if 0
 template <filemode FM = M,
 	typename std::enable_if<
 	FM == filemode::r || FM == filemode::rw || FM == filemode::rplus
@@ -355,8 +363,6 @@ template <filemode FM = M,
 			typename std::enable_if<
 			FM != filemode::r && FM != filemode::rb,
 			char_type_t>::type* = nullptr>
-#	endif
+#endif
 
 #endif // CXXCOMP_FILE_H
-
-#endif // TEXPP_IO_H
