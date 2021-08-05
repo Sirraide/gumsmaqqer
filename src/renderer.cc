@@ -14,9 +14,9 @@ namespace Gumsmaq {
 	if (it == end) break; \
 	else                  \
 		continue
-vector_t VectorFromAbbr(const wstring& str) {
+vector_t VectorFromAbbr(const string& str) {
 	vector_t   ret;
-	wstring	   buf;
+	string	   buf;
 	const auto end = str.end();
 
 	for (auto it = str.begin(); it != end;) {
@@ -24,13 +24,13 @@ vector_t VectorFromAbbr(const wstring& str) {
 			if (!isspace(*it)) buf += *it;
 			it++;
 		}
-		if (it == end) throw std::runtime_error("Invalid Gumsmaq: missing number");
+		if (it == end) fatal("Invalid Gumsmaq: missing number");
 
 		if (isdigit(*it)) {
-			wstring num;
+			string num;
 			do num += *it++;
 			while (it != end && isdigit(*it));
-			ret.emplace_back(buf, wcstol(num.c_str(), nullptr, 10));
+			ret.emplace_back(buf, strtol(num.c_str(), nullptr, 10));
 			buf.clear();
 			CONTINUE;
 		}
@@ -38,25 +38,21 @@ vector_t VectorFromAbbr(const wstring& str) {
 	return ret;
 }
 
-wstring VectorToUnicode(const vector_t& gumsmaq) {
-	wstring out;
+string VectorToUnicode(const vector_t& gumsmaq) {
+	string out;
 	for (const auto& g : gumsmaq) repeat(g.second) out += abbr_gumsmaq_table.at(g.first);
 	return out;
 }
 
-const image& LoadLetter(const wstring& which) {
-	static unordered_map<wstring, image> cached_letters;
+const image& LoadLetter(const string& which) {
+	static unordered_map<string, image> cached_letters;
 #ifdef WIN32
 	static const string img_root = "twemoji\\assets\\72x72\\";
 #else
 	static const string img_root = "twemoji/assets/72x72/";
 #endif
 	if (!cached_letters.contains(which)) {
-		if (!abbr_gumsmaq_table.contains(which)) {
-			wcerr << L"Error: '" << which << L"' is not valid gumsmaq. Aborted";
-			exit(1);
-		}
-
+		if (!abbr_gumsmaq_table.contains(which)) fatal("Error: '" + which + "' is not valid gumsmaq. Aborted");
 		stringstream stream;
 		stream << hex << (int) abbr_gumsmaq_table.at(which);
 		string img_path = img_root + stream.str() + ".png";
@@ -81,16 +77,17 @@ image ArrangeGroup(const letter_group_t& lg, int start_index, int letter_count) 
 	return img;
 }
 
-#define max_count gumsmaq_max_letter_group_count
+#define max_count		   gumsmaq_max_letter_group_count
+#define max_count_indented (gumsmaq_max_letter_group_count - gumsmaq_group_indent_count)
 image LetterGroup(const letter_group_t& group, bool indented) {
 	image		  img;
-	int			  first_count = indented ? max_count - 1 : max_count;
+	int			  first_count = indented ? max_count_indented : max_count;
 	vector<image> lines;
 	if (group.second > first_count) {
 		int	  remaining = group.second - first_count;
 		image first		= ArrangeGroup(group, 0, first_count);
 
-		int count		 = max_count - 1;
+		int count		 = max_count_indented;
 		int count_groups = remaining / count;
 
 		int start_index = first_count;
@@ -109,18 +106,18 @@ image LetterGroup(const letter_group_t& group, bool indented) {
 
 		img = image{GUMSMAQ_LINE_WIDTH, ht};
 
-		img.WriteAtIfAlpha(indented ? gumsmaq_group_indent : 0, 0, first);
+		img.WriteAtIfAlpha(indented ? GUMSMAQ_GROUP_INDENT_WIDTH : 0, 0, first);
 		int y = GUMSMAQ_LINE_HEIGHT;
 		for (const auto& line : lines) {
-			img.WriteAtIfAlpha(gumsmaq_group_indent, y, line);
+			img.WriteAtIfAlpha(GUMSMAQ_GROUP_INDENT_WIDTH, y, line);
 			y += GUMSMAQ_LINE_HEIGHT;
 		}
 		if (remaining % count > 0)
-			img.WriteAtIfAlpha(gumsmaq_group_indent, y, last);
+			img.WriteAtIfAlpha(GUMSMAQ_GROUP_INDENT_WIDTH, y, last);
 	} else {
 		image line = ArrangeGroup(group, 0, group.second);
 		img		   = image{GUMSMAQ_LINE_WIDTH, GUMSMAQ_LINE_HEIGHT};
-		img.WriteAtIfAlpha(indented ? gumsmaq_group_indent : 0, 0, line);
+		img.WriteAtIfAlpha(indented ? GUMSMAQ_GROUP_INDENT_WIDTH : 0, 0, line);
 	}
 	return img;
 }
@@ -131,21 +128,23 @@ image Paragraph(const vector_t& groups) {
 	vector<image>		  current_block;
 	for (const auto& group : groups) {
 		if (group.second < 1) {
-			wcerr << "Warning: group '" << group.first << to_wstring(group.second)
-				  << "' is empty and was skipped\n";
+			cerr << "Warning: group '" << group.first << to_string(group.second)
+				 << "' is empty and was skipped\n";
 			continue;
 		}
 		if (remaining_lines <= 0) {
 			blocks.push_back(current_block);
 			current_block.clear();
-			remaining_lines = 10;
+			remaining_lines = gumsmaq_max_line_count;
 		}
-		int chars_available = !remaining_lines ? 0 : remaining_lines * (max_count - 1);
+		int chars_available = !remaining_lines ? 0 : remaining_lines * max_count_indented;
 		if (chars_available + 1 >= group.second) {
 			/// this part is the worst...
-			int line_diff = group.second / (max_count - 1);
+			int line_diff = group.second / max_count_indented;
 			if (group.second == 1) line_diff = 1;
-			else if (int mod = group.second - 1; group.second % 9 && mod > 0 && mod % 9)
+			else if (int mod = group.second - 1; group.second % max_count_indented
+												 && mod > 0
+												 && mod % max_count_indented)
 				line_diff++;
 			remaining_lines -= line_diff;
 
@@ -158,7 +157,7 @@ image Paragraph(const vector_t& groups) {
 			current_block.clear();
 
 			int letters_to_print		  = group.second - chars_available - 1;
-			int letters_in_indented_block = gumsmaq_max_line_count * (max_count - 1);
+			int letters_in_indented_block = gumsmaq_max_line_count * max_count_indented;
 			if (letters_to_print >= letters_in_indented_block)
 				do {
 					current_block.push_back(LetterGroup({group.first, letters_in_indented_block},
@@ -171,9 +170,11 @@ image Paragraph(const vector_t& groups) {
 			if (letters_to_print) {
 				current_block.push_back(LetterGroup({group.first, letters_to_print}, chars_available));
 				/// ... and this part ...
-				int line_diff = letters_to_print / (max_count - 1);
+				int line_diff = letters_to_print / max_count_indented;
 				if (letters_to_print == 1) line_diff = 1;
-				else if (int mod = letters_to_print - 1; letters_to_print % 9 && mod > 0 && mod % 9)
+				else if (int mod = letters_to_print - 1; letters_to_print % max_count_indented
+														 && mod > 0
+														 && mod % max_count_indented)
 					line_diff++;
 				remaining_lines = gumsmaq_max_line_count - line_diff;
 			} else
@@ -184,7 +185,8 @@ image Paragraph(const vector_t& groups) {
 		blocks.push_back(current_block);
 
 	int bsiz = blocks.size();
-	int ht	 = 0;
+	if (!bsiz) return image{0, 0};
+	int ht = 0;
 	if (blocks.size() == 1)
 		for (const auto& block : blocks[0]) ht += block.height;
 	else

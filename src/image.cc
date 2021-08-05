@@ -1,4 +1,5 @@
 #include "image.h"
+
 #include "../lib/io.h"
 // clang-format off
 #define STB_IMAGE_IMPLEMENTATION
@@ -6,18 +7,22 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../lib/stb_image_write.h"
 // clang-format on
+#include "utils.h"
 
 #include <cstdlib>
 
 using namespace std;
 image::image(const std::string& filename) {
 	io::file<char, io::filemode::rb>(filename, io::perror_and_exit);
-	if (data = stbi_load(filename.c_str(), &width, &height, &channels, 0), !data)
-		throw std::runtime_error("Could not load image from file '" + filename + "'");
+	int ch;
+	if (data = stbi_load(filename.c_str(), &width, &height, &ch, 0), !data)
+		fatal("Could not load image from file '" + filename + "'");
+	if (ch != channels)
+		fatal("Expected file with 4 channels, got " + to_string(ch));
 	size = width * height * channels;
 	checksize();
 }
-image::image(int _width, int _height, int _channels) : width(_width), height(_height), channels(_channels) {
+image::image(int _width, int _height) : width(_width), height(_height) {
 	size  = width * height * channels;
 	alloc = true;
 	data  = static_cast<data_t*>(calloc(size, 1));
@@ -41,7 +46,6 @@ image& image::operator=(const image& other) {
 image& image::operator=(image&& other) noexcept {
 	width	   = other.width;
 	height	   = other.height;
-	channels   = other.channels;
 	data	   = other.data;
 	other.data = nullptr;
 	return *this;
@@ -115,5 +119,5 @@ void image::WriteAtIfAlpha(int at_x, int at_y, const image& img) const {
 	CXX_WriteIfAlpha(img_data, where_start, img.width, width, m_height);
 }
 void image::checksize() const {
-	if (size < 0) throw std::runtime_error("Image size may not be less than zero!");
+	if (size < 0) fatal("An internal error occurred. Image size may not be less than zero!");
 }

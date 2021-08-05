@@ -30,6 +30,7 @@ CompactNamespaces: false
 DerivePointerAlignment: false
 DisableFormat: false
 FixNamespaceComments: true
+ForEachMacros: ['ALIAS']
 IncludeBlocks: Regroup
 IndentCaseLabels: true
 IndentPPDirectives: AfterHash

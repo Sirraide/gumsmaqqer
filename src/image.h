@@ -25,15 +25,15 @@ __pragma(pack(pop))
 	static_assert(sizeof(pixel) == 4 * sizeof(data_t));
 
 struct image {
-	int		width{};
-	int		height{};
-	int		channels{};
-	int		size = 0;
-	data_t* data{};
-	bool	alloc = false;
+	int						   width{};
+	int						   height{};
+	static constexpr const int channels = 4;
+	int						   size		= 0;
+	data_t*					   data{};
+	bool					   alloc = false;
 
 	explicit image(const std::string& filename);
-	explicit image(int width = 0, int height = 0, int channels = 4);
+	explicit image(int width = 0, int height = 0);
 	image(const image& other);
 	image(image&& other) noexcept;
 	image& operator=(const image& other);

@@ -3,8 +3,8 @@
 #include "utils.h"
 
 #define EMOJI(name) \
-	{ CAT(L, STR(name)), static_cast<wchar_t>(Gumsmaq::name) }
-const std::unordered_map<std::wstring, wchar_t> name_gumsmaq_table = {
+	{ #name, Gumsmaq::name }
+const std::unordered_map<std::string, unsigned> name_gumsmaq_table = {
 	EMOJI(green_apple),
 	EMOJI(apple),
 	EMOJI(pear),
@@ -129,16 +129,10 @@ const std::unordered_map<std::wstring, wchar_t> name_gumsmaq_table = {
 	EMOJI(salt),
 };
 
-#ifdef WIN32
-#	define wchar_type_t char32_t
-#else
-#	define wchar_type_t wchar_t
-#endif
-
 #undef EMOJI
 #define EMOJI(str, name) \
-	{ CAT(L, str), static_cast<wchar_type_t>(Gumsmaq::name) }
-const std::unordered_map<std::wstring, wchar_t> abbr_gumsmaq_table = {
+	{ str, Gumsmaq::name }
+const std::unordered_map<std::string, unsigned> abbr_gumsmaq_table = {
 	EMOJI("gA", green_apple),
 	EMOJI("A", apple),
 	EMOJI("P", pear),

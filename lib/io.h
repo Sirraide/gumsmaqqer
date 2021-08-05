@@ -13,6 +13,7 @@
 #	include <sys/types.h>
 #	include <unistd.h>
 #endif
+#include <cstring>
 #include <vector>
 
 namespace io {

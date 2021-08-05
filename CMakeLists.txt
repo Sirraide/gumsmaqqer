@@ -4,20 +4,40 @@ project(gumsmaqqer CXX C ASM)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ..)
 
-if (WIN32)
-else ()
-    set(CMAKE_CXX_COMPILER clang++)
-endif ()
-
 file(GLOB SRC
         src/*.cc
         src/*.h
         src/*.S
+        lib/*.h
+        lib/*.cc
         )
 
-add_executable(gumsmaqqer ${SRC} lib/io.h)
-
-if (WIN32)
+if (MSVC)
+    add_compile_definitions(EXECUTABLE_NAME="gumsmaqqer.exe")
 else ()
-    target_compile_options(gumsmaqqer PRIVATE -Wall -Wextra -Wundef -march=native -Wno-missing-field-initializers -Wno-sign-compare)
+    set(CMAKE_CXX_COMPILER clang++)
+    add_compile_definitions(EXECUTABLE_NAME="gumsmaqqer")
+endif ()
+
+add_executable(gumsmaqqer ${SRC})
+
+add_custom_command(
+        COMMAND ./version.p6
+        TARGET gumsmaqqer
+        WORKING_DIRECTORY ..
+)
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(DEBUG_BUILD)
+endif ()
+
+if (MSVC)
+    target_compile_options(gumsmaqqer PRIVATE)
+else ()
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        add_compile_options(-O0 -g)
+    else ()
+        add_compile_options(-O3)
+    endif ()
+add_compile_options(-Wall -Wextra -Wundef -march=native -Wno-missing-field-initializers -Wno-sign-compare)
 endif ()

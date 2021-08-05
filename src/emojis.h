@@ -4,14 +4,8 @@
 #include <string>
 #include <unordered_map>
 
-#ifdef WIN32
-#	define wchar_type_t char32_t
-#else
-#	define wchar_type_t wchar_t
-#endif
-
 namespace Gumsmaq {
-enum : wchar_type_t {
+enum : unsigned {
 	green_apple			= 127823, // L'🍏'
 	apple				= 127822, // L'🍎'
 	pear				= 127824, // L'🍐'
@@ -138,8 +132,8 @@ enum : wchar_type_t {
 
 }
 
-extern const std::unordered_map<std::wstring, wchar_t>		name_gumsmaq_table;
-extern const std::unordered_map<std::wstring, wchar_type_t> abbr_gumsmaq_table;
+extern const std::unordered_map<std::string, unsigned> name_gumsmaq_table;
+extern const std::unordered_map<std::string, unsigned> abbr_gumsmaq_table;
 
 #undef wchar_type_t
 
