@@ -2,8 +2,7 @@
 This is the GUMSMAQQER
 
 ## Executable
-Windows: [gumsmaqqer.exe](gumsmaqqer.exe)
-
+Windows: [gumsmaqqer.exe](gumsmaqqer.exe)\
 Linux:   [gumsmaqqer](gumsmaqqer)
 
 ## How to build from source
