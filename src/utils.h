@@ -2,22 +2,39 @@
 #define GUMSMAQQER_UTILS_H
 
 #include "../lib/io.h"
+#include "version.h"
 
 #include <cassert>
 #include <iostream>
 #include <string>
-#include "version.h"
 
-#define Y "\033[33m"
-#define B "\033[36m"
-#define M "\033[35m"
-#define W  "\033[0m"
-#define G "\033[32m"
+#define Y		 "\033[33m"
+#define B		 "\033[36m"
+#define M		 "\033[35m"
+#define R		 "\033[0m"
+#define W		 "\033[1;37m"
+#define G		 "\033[32m"
+#define RED		 "\033[31m"
+#define RED_BOLD "\033[1;31m"
 
 #define GUMSMAQQER_MAJOR_VERSION 0
-#define GUMSMAQQER_MINOR_VERSION 6
-#define GUMSMAQQER_VERSION		 STR(GUMSMAQQER_MAJOR_VERSION) \
-"." STR(GUMSMAQQER_MINOR_VERSION) "." STR(GUMSMAQQER_PATCH_VERSION)
+#define GUMSMAQQER_MINOR_VERSION 7
+#define GUMSMAQQER_VERSION        \
+	STR(GUMSMAQQER_MAJOR_VERSION) \
+	"." STR(GUMSMAQQER_MINOR_VERSION) "." STR(GUMSMAQQER_PATCH_VERSION)
+
+#ifdef WIN32
+#	define GUMSMAQ_NORETURN __declspec(noreturn)
+#	define GUMSMAQ_PACKED
+template <typename T>
+inline T clamp(T val, T lo, T hi) {
+	return val < lo ? lo : val > hi ? hi
+									: val;
+}
+#else
+#	define GUMSMAQ_NORETURN __attribute__((noreturn))
+#	define GUMSMAQ_PACKED	 __attribute__((packed))
+#endif
 
 #ifdef DEBUG_BUILD
 //#define DEBUG_DO_THROW
@@ -39,17 +56,18 @@
 #define repeat(N_) for (size_t iter__ = 0, N__ = N_; iter__ < N__; iter__++)
 
 #if defined(DEBUG_BUILD) && defined(DEBUG_DO_THROW)
-#	define fatal(X) throw std::runtime_error(__FILE__ ":" STR(__LINE__))
+#	define fatal(...) throw std::runtime_error(__FILE__ ":" STR(__LINE__))
 #else
-__attribute__((noreturn)) inline void fatal(const std::string& err) noexcept {
-	std::cerr << err << "\n";
+GUMSMAQ_NORETURN inline void fatal(const std::string colour, const std::string& err) noexcept {
+	std::cerr << colour << err << R << colour << "\nABORTED AND SUNKEN INTO DESPAIR"
+			  << "\nEIDOLA OF PRODIGIOUS INEPTITUDE MAY AVAIL THEIR PITIFUL SELVES OF " R Y "-h" R "\n";
 	exit(1);
 }
-
-__attribute__((noreturn)) inline void fatal(const std::wstring& err) noexcept {
-	std::wcerr << err << "\n";
-	exit(1);
-}
+//GUMSMAQ_NORETURN inline void fatal(const std::wstring colour, const std::wstring& err) noexcept {
+//	std::wcerr << err << R << colour << L"\nABORTED AND SUNKEN INTO DESPAIR"
+//	<< L"\nEIDOLA OF PRODIGIOUS INEPTITUDE MAY AVAIL THEIR PITIFUL SELVES OF " R Y "-h" R "\n";
+//	exit(1);
+//}
 #endif
 
 std::wstring strtowcs(const std::string& str);

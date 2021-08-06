@@ -3,16 +3,14 @@
 
 #include <string>
 #include <vector>
+#include "utils.h"
 
 using data_t = unsigned char;
 
 #ifdef WIN32
-#	define PACKED
 __pragma(pack(push, 1))
-#else
-#	define PACKED __attribute__((packed))
 #endif
-	struct PACKED pixel {
+struct GUMSMAQ_PACKED pixel {
 	data_t r;
 	data_t g;
 	data_t b;

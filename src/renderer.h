@@ -16,7 +16,7 @@ image LetterGroup(const letter_group_t& lg, bool indented = false);
 
 const image& LoadLetter(const std::string& which);
 vector_t	 VectorFromAbbr(const std::string& str);
-std::string VectorToUnicode(const vector_t& gumsmaq);
+std::string	 VectorToUnicode(const vector_t& gumsmaq);
 
 }; // namespace Gumsmaq
 

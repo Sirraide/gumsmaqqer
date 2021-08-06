@@ -24,7 +24,7 @@ vector_t VectorFromAbbr(const string& str) {
 			if (!isspace(*it)) buf += *it;
 			it++;
 		}
-		if (it == end) fatal("Invalid Gumsmaq: missing number");
+		if (it == end) fatal(RED_BOLD, "INVALID GUMSMAQ");
 
 		if (isdigit(*it)) {
 			string num;
@@ -52,7 +52,7 @@ const image& LoadLetter(const string& which) {
 	static const string img_root = "twemoji/assets/72x72/";
 #endif
 	if (!cached_letters.contains(which)) {
-		if (!abbr_gumsmaq_table.contains(which)) fatal("Error: '" + which + "' is not valid gumsmaq. Aborted");
+		if (!abbr_gumsmaq_table.contains(which)) fatal(RED_BOLD, "INVALID GUMSMAQ \"" RED + which + RED_BOLD "\"");
 		stringstream stream;
 		stream << hex << (int) abbr_gumsmaq_table.at(which);
 		string img_path = img_root + stream.str() + ".png";
@@ -128,8 +128,8 @@ image Paragraph(const vector_t& groups) {
 	vector<image>		  current_block;
 	for (const auto& group : groups) {
 		if (group.second < 1) {
-			cerr << "Warning: group '" << group.first << to_string(group.second)
-				 << "' is empty and was skipped\n";
+			cerr << RED "VACUOUS GUMSMAQ \"" << group.first << to_string(group.second)
+				 << "\" LOST IN SPACE AND TIME\n" R;
 			continue;
 		}
 		if (remaining_lines <= 0) {
@@ -164,7 +164,7 @@ image Paragraph(const vector_t& groups) {
 						chars_available));
 					blocks.push_back(current_block);
 					current_block.clear();
-					chars_available = 1; // dummy value so that !chars_available is false
+					chars_available = 1; /// dummy value so that it's true in the call to LetterGroup above
 				} while ((letters_to_print -= letters_in_indented_block) >= letters_in_indented_block);
 
 			if (letters_to_print) {
@@ -183,6 +183,9 @@ image Paragraph(const vector_t& groups) {
 	}
 	if (!current_block.empty())
 		blocks.push_back(current_block);
+
+	if(blocks.empty())
+		fatal(RED, "GUMSMAQQING YIELDED ONLY VAST EMPTINESS");
 
 	int bsiz = blocks.size();
 	if (!bsiz) return image{0, 0};

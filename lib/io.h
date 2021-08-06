@@ -77,8 +77,8 @@ struct file {
 	filemode	mode   = M;
 	rd			rdmode = rd::words;
 
-	/// Opens a file and constructs a wrapper around it. on_error(this) is called should the file fail to open.
-	explicit file(std::string filename_, std::function<void(const std::string&)> on_error = {}) noexcept : filename(move(filename_)) {
+	/// Opens a file and constructs a wrapper around it. on_error(this->filename) is called should the file fail to open.
+	explicit file(std::string filename_, const std::function<void(const std::string&)>& on_error = {}) noexcept : filename(move(filename_)) {
 		handle = fopen(filename.c_str(), __fmode_to_str(M).data());
 		if (!handle) on_error(filename);
 	}
@@ -101,8 +101,6 @@ struct file {
 
 #ifndef WIN32
 	/// Map the entire file into memory
-	/// TODO: mmap directly into string in case of regular char's
-	/// TODO: separate file_map wrapper w/ read/write capabilities
 	auto mmap() noexcept -> string_t requires Readable<M> {
 		struct stat s {};
 		int			d = fd();

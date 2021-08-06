@@ -1,3 +1,7 @@
+#ifdef WIN32
+#	include "windows.h"
+#endif
+
 #include "../lib/io.h"
 #include "renderer.h"
 #include "utils.h"
@@ -19,25 +23,36 @@ bool no_colour	   = false;
 bool print_usage   = false;
 bool verbose	   = false;
 
-string				ofilename;
-vector<io::infile*> infiles;
-vector<string>		input_text;
+string		ofilename;
+io::infile* infile;
+string		input_text;
 
-__attribute__((noreturn)) inline void FatalArgs(const string& errmsg) {
-	fatal(errmsg + "\nUse --help to print usage information.");
+const string help_message = RED "\nEIDOLA OF PRODIGIOUS INEPTITUDE MAY AVAIL THEIR PITIFUL SELVES OF " R Y "-h" R;
+
+#ifdef WIN32
+void WindowsInit() {
+// enable ansi colour printing
+#	ifdef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+	HANDLE err = GetStdHandle(STD_ERROR_HANDLE);
+	DWORD  omode, emode;
+	GetConsoleMode(out, &omode);
+	GetConsoleMode(err, &emode);
+	SetConsoleMode(out, omode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+	SetConsoleMode(err, emode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+#	endif
 }
+#endif
 
-__attribute__((noreturn)) void PerrorArgs(const string& filename) {
-	std::string s = "File '" + filename + "' opened by io::file is invalid";
-	perror(s.c_str());
-	fatal("\nUse --help to print usage information.");
+void reset_colour() {
+	cout << R;
 }
 
 int Number(const char* arg) {
 	try {
 		long l = strtol(arg, nullptr, 10);
 		return int(l);
-	} catch (exception& ignored) { fatal(string("Error: ") + arg + "is not a number."); }
+	} catch (exception& ignored) { fatal(RED, "BAD NUMBER \"" G + string(arg)); }
 }
 
 void SetText(string& what, const char* arg) {
@@ -46,116 +61,123 @@ void SetText(string& what, const char* arg) {
 	if (what.ends_with('\"') || what.ends_with('\'')) what.erase(what.size() - 1);
 }
 
+// clang-format off
 string RemoveColour(string& str) {
 	for (;;) {
-		auto pos = str.find("\033");
+		auto pos = str.find('\033');
 		if (pos == string::npos) break;
-		str.replace(pos, str[pos + 2] == '0' ? 4 : str[pos + 3] == ';' ? 7
-																	   : 5,
-			"");
+		str.replace(pos, str[pos + 2] == '0' ? 4 : str[pos + 3] == ';' ? 7 : 5, "");
 	}
 	return str;
 }
+// clang-format on
 
-__attribute((noreturn)) void PrintVersion() {
+GUMSMAQ_NORETURN inline void FatalArgs(const string& errmsg) {
+	string err = RED + errmsg;
+#if !defined(WIN32) || defined(ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+	err = no_colour ? RemoveColour(err) : err;
+#else
+	err	 = RemoveColour(err);
+#endif
+	fatal(RED, err);
+}
+
+GUMSMAQ_NORETURN void PerrorArgs(const string& filename) {
+	std::string s = RED "BAD FILE " G + filename + R;
+	perror(s.c_str());
+	fatal(RED, "");
+}
+
+GUMSMAQ_NORETURN void PrintVersion() {
 	static const string version_info = Y "This is version " B GUMSMAQQER_VERSION Y " of the "
-	  "\033[1;33mGumsmaqqer\n" W Y
-	  "Converts SGTF (Standard Gumsmaq Transcription Form) to either Unicode or PNG\n"
-	  "See also --help for more detailed information\n";
+										 "\033[1;33mGUMSMAQQER\n" R Y
+										 "Converts SGTF (Standard Gumsmaq Transcription Form) to either Unicode or PNG\n"
+										 "See also --help for more detailed information\n" R;
 	cout << version_info << flush;
 	exit(0);
 }
 
-__attribute__((noreturn)) void PrintUsage() {
+GUMSMAQ_NORETURN void PrintUsage() {
 	static const string usage =
 		Y "See also --help for more detailed information\n\n"
 		  "Usage: " B EXECUTABLE_NAME Y " [ OPTIONS ]" G " <data> " Y "[ OPTIONS ]\n"
 		  "\n"
-		  "  " G "<data>" W " can be " Y "[ -s" W ", " Y "--string ] " G "<string>" W " or " Y "-f" W ", " Y "--file " G "<file>\n" W
+		  "  " G "<data>" R " can be " Y "[ -s" R ", " Y "--string ] " G "<string>" R " or " Y "-f" R ", " Y "--file " G "<file>\n" R
 		  "\n"
 		  "  OPTIONS:\n"
-		  "      " Y "-h" W ", " Y "--help" W "              Display help information. Note that " Y "--help" W " is much more\n"
-		  "                              verbose than " Y "-h" W ".\n"
-		  "      " Y "-o" W ", " Y "--out " G "<filename> " W "   Tell the "
+		  "      " Y "-h" R ", " Y "--help" R "              Display help information. Note that " Y "--help" R " is much more\n"
+		  "                              verbose than " Y "-h" R ".\n"
+		  "      " Y "-o" R ", " Y "--out " G "<filename> " R "   Tell the "
 		  "\033[1;33m"
-		  "Gumsmaqqer" W " to output to " G "<filename>" W ".\n" Y
-		  "      -g" W ", " Y "--group-length " G "<n>" W "  Set the group length to " G "<n>" W " (" G "<n> - 1" W " for indented lines).\n" Y
-		  "      -l" W ", " Y "--lines " G "<n> " W "        Set the number of lines that may appear in a block;\n" Y
-		  "      -k" W ", " Y "--kern " G "<n>" W "          Set the kerning between letters to " G "<n>" W " pixels.\n" Y
-		  "      -b" W ", " Y "--block-space " G "<n>" W "   Set the space between blocks to " G "<n>" W " pixels.\n" Y
-		  "      -i" W ", " Y "--indent " G "<n>" W "	      Set line indentation to " G "<n>\n" Y
-		  "      -m" W ", " Y "--merge" W "             Merge all input " G "<string>" W "s into one file.\n" Y
-		  "      -M" W ", " Y "--merge-files" W "       Same as " Y "--merge" W " but for files.\n" Y
-		  "      -t" W ", " Y "--text" W "              Switch to textual output mode for all following " G "<string>" W "s and " G "<file>" W "s.\n" Y
-		  "      -I" W ", " Y "--image" W "             This is the opposite of " Y "--text\n" W;
+		  "Gumsmaqqer" R " to output to " G "<filename>" R ".\n" Y
+		  "      -g" R ", " Y "--group-length " G "<n>" R "  Set the group length to " G "<n>" R " (" G "<n> - 1" R " for indented lines).\n" Y
+		  "      -l" R ", " Y "--lines " G "<n> " R "        Set the number of lines that may appear in a block;\n" Y
+		  "      -k" R ", " Y "--kern " G "<n>" R "          Set the kerning between letters to " G "<n>" R " pixels.\n" Y
+		  "      -b" R ", " Y "--block-space " G "<n>" R "   Set the space between blocks to " G "<n>" R " pixels.\n" Y
+		  "      -i" R ", " Y "--indent " G "<n>" R "	      Set line indentation to " G "<n>" R ".\n" Y
+		  "      -t" R ", " Y "--text" R "              Enable textual output mode.\n" Y
+		  "      -N" R ", " Y "--no-colour" R "         Print help information without colours.\n" R;
 
 	static const string							  usage_verbose =
 		Y "This is version " B GUMSMAQQER_VERSION Y " of the "
 		  "\033[1;33m"
-		  "Gumsmaqqer\n" W Y
+		  "Gumsmaqqer\n" R Y
 		  "Converts SGTF (Standard Gumsmaq Transcription Form) to either Unicode or PNG\n\n"
 		  "Usage: " B EXECUTABLE_NAME Y " [ OPTIONS ]" G " <sgtf> " Y "[ OPTIONS ]\n"
 		  "\n"
-		  "  " G "<sgtf>" W " can be either (or multiple of):\n" Y
-		  "      [ -s" W ", " Y "--string ] " G "<string>\n" Y
-		  "      -f" W ", " Y "--file       " G "<file>\n" W
-		  "  where " G "<string>" W " is text in SGTF, with or without quotation marks\n"
-		  "  and " G "<file>" W " is a file containing the SGTF text to be converted.\n"
+		  "  " G "<sgtf>" R " can be either:\n" Y
+		  "      [ -s" R ", " Y "--string ] " G "<string>\n" Y
+		  "      -f" R ", " Y "--file       " G "<file>\n" R
+		  "  where " G "<string>" R " is text in SGTF, with or without quotation marks\n"
+		  "  and " G "<file>" R " is a file containing the SGTF text to be converted.\n"
+		  "  if both are specified, only " G "<file>" R " is converted."
 		  "\n"
 		  "  OPTIONS:\n"
-		  "      " Y "-h" W ", " Y "--help" W "              Display help information. Note that " Y "--help" W " is much more\n"
-		  "                              verbose than " Y "-h" W ".\n"
+		  "      " Y "-h" R ", " Y "--help" R "              Display help information. Note that " Y "--help" R " is much more\n"
+		  "                              verbose than " Y "-h" R ".\n"
 		  "\n"
-		  "      " Y "-o" W ", " Y "--out " G "<filename> " W "   Tell the "
+		  "      " Y "-o" R ", " Y "--out " G "<filename> " R "   Tell the "
 		  "\033[1;33m"
-		  "Gumsmaqqer" W " to output the first " G "<string> " W "or" G " <file>\n" W
-		  "                              to " G "<filename>" W ". If multiple " G "<string>" W "s or  " G "<file>" W "s passed, " Y "--out\n" W
-		  "                              may be used multiople times to specify output files\n"
-		  "                              for the respective strings, in order. Default: 'gumsmaq.png'.\n"
-		  "\n"
-		  "                              See also " Y "--merge" W " and " Y "--merge-files\n"
-		  "\n"
-		  "      -g" W ", " Y "--group-length " G "<n>" W "  Set the number of letters that may appear in a line to " G "<n>\n" W
-		  "                              (" G "<n> - 1" W " for indented lines). Must be greater than 0. Default: 10.\n"
+		  "GUMSMAQQER" R " to output the first " G "<string> " R "or" G " <file>\n" R
+		  "                              to " G "<filename>." W
+		  "Default: 'gumsmaqqed.png'" R ".\n"
 		  "\n" Y
-		  "      -l" W ", " Y "--lines " G "<n> " W "        Set the number of lines that may appear in a block;\n"
+		  "      -g" R ", " Y "--group-length " G "<n>" R "  Set the number of letters that may appear in a line to " G "<n>\n" R
+		  "                              (" G "<n> - 1" R " for indented lines). Must be greater than 0." W " Default: 10" R ".\n"
+		  "\n" Y
+		  "      -l" R ", " Y "--lines " G "<n> " R "        Set the number of lines that may appear in a block;\n"
 		  "                              note also that is does not matter how many letters a line/group\n"
-		  "                              contains. Must be greater than 0. Default: 10.\n"
+		  "                              contains. Must be greater than 0. " W "Default: 10" R ".\n"
 		  "\n" Y
-		  "      -k" W ", " Y "--kern " G "<n>" W "          Set the kerning between letters to " G "<n>" W " pixels. This determines\n"
+		  "      -k" R ", " Y "--kern " G "<n>" R "          Set the kerning between letters to " G "<n>" R " pixels. This determines\n"
 		  "                              how close together or far apart the letters in a line are printed.\n"
-		  "                              Negative values may be specified. Default: -24.\n"
+		  "                              Negative values may be specified. " W "Default: -24" R ".\n"
 		  "\n"
 		  "                              Note that this setting has no effect when in textual output mode.\n"
 		  "\n" Y
-		  "      -b" W ", " Y "--block-space " G "<n>" W "   Set the space between blocks to " G "<n>" W " pixels. Default: 15.\n"
+		  "      -b" R ", " Y "--block-space " G "<n>" R "   Set the space between blocks to " G "<n>" R " pixels. " W "Default: 15" R ".\n"
 		  "\n" Y
-		  "      -i" W ", " Y "--indent " G "<n>" W "	      Set line indentation to " G "<n>" W " letters for all but the first sub-line\n"
+		  "      -i" R ", " Y "--indent " G "<n>" R "	      Set line indentation to " G "<n>" R " letters for all but the first sub-line\n"
 		  "                              in a group. May not be negative and must be less than the value\n"
-		  "                              specified for " Y "--group-length" W ". Default: 1.\n"
+		  "                              specified for " Y "--group-length" R ". " W "Default: 1" R ".\n"
 		  "\n" Y
-		  "      -m" W ", " Y "--merge" W "             Merge all input " G "<string>" W "s into one file. The first filename\n"
-		  "                              specified with " Y "--out" W " that corresponds to a string is chosen.\n"
-		  "                              The remainder is ignored but not taken into account for resolving\n" Y
-		  "                              --out" W " filenames for " G "<files>" W "s. Disabled by default.\n"
+		  "      -t" R ", " Y "--text" R "              Enable textual output mode. The SGTF is converted to Unicode letters.\n"
+		  "                              instead of to an image. " W "Default: disabled" R ".\n"
 		  "\n" Y
-		  "      -M" W ", " Y "--merge-files" W "       Same as " Y "--merge" W " but for files. Disabled by default.\n"
-		  "\n" Y
-		  "      -t" W ", " Y "--text" W "              Switch to textual output mode for all following " G "<string>" W "s or " G "<file>" W "s.\n"
-		  "                              The SGTF is converted to Unicode letters instead of to an image.\n" G
-		  "                              <files>" W " are output to .txt files. " G "<string>" W "s are output to stdout,\n"
-		  "                              unless " Y "--out " G "<files>" W "s are specified. Disabled by default.\n"
-		  "\n" Y
-		  "      -I" W ", " Y "--image" W "             Switch to converting SGTF to a .png instead of text for all following\n" G
-		  "                              <string>" W "s and " G "<file>" W "s. This is the opposite of " Y "--text" W ". Enabled by default.\n"
+		  "      -N" R ", " Y "--no-colour" R "         Print help information without colours. Does nothing otherwise. " W "Default:\n"
+		  "                              disabled" R "."
 		  "\n"
 		  "  EXAMPLES:\n"
-		  "      " B EXECUTABLE_NAME W " \"gA4L45T5NACL2\"\n"
-		  "      " B EXECUTABLE_NAME Y " -f" W " my_gumsmaq.sgtf.txt " Y "-o " W " compiled.gumsmaq.png\n"
-		  "      " B EXECUTABLE_NAME W " \"gA4L45T5NACL2\" " Y "-o" W " output_file.png\n";
+		  "      " B EXECUTABLE_NAME R " \"gA4L45T5NACL2\"\n"
+		  "      " B EXECUTABLE_NAME Y " -f" R " my_gumsmaq.sgtf.txt " Y "-o " R " compiled.gumsmaq.png\n"
+		  "      " B EXECUTABLE_NAME R " \"gA4L45T5NACL2\" " Y "-o" R " output_file.png\n";
 
 	auto help = verbose ? usage_verbose : usage;
-	help	  = no_colour ? RemoveColour(help) : help;
+#if !defined(WIN32) || defined(ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+	help = no_colour ? RemoveColour(help) : help;
+#else
+	help = RemoveColour(help);
+#endif
 	cout << help << flush;
 	exit(0);
 }
@@ -172,36 +194,34 @@ __attribute__((noreturn)) void PrintUsage() {
 #define ALIAS(opt_str) \
 	if (!strcmp(argv[i], opt_str))
 
-#define SETNUMBER(option_name, what) SETVAL("Error: missing number after " option_name "", what = Number(argv[i]))
+#define SETNUMBER(option_name, what) SETVAL("MISSING VALUE\nMUST NEEDS PASS NUMBER AFTER " Y option_name R, what = Number(argv[i]))
 
 #define DEPTH(depth, parsed_so_far) \
-	if (len == depth) FatalArgs("Unrecognised option '" parsed_so_far "'");
+	if (len == depth) FatalArgs("BAD OPTION \"" Y parsed_so_far RED "\"" R);
 
 void HandleArguments(int argc, char** argv) {
-	if (argc == 1) PrintUsage();
+	if (argc == 1) FatalArgs("\"AND IF THOU GAZE LONG INTO AN ABYSS, THE ABYSS WILL GAZE BACK INTO THEE\"");
 	for (int i = 1; i < argc; i++) {
 		auto len = strlen(argv[i]);
+		// clang-format off
 		switch (argv[i][0]) {
 			case '-':
 				DEPTH(1, "-")
-				// clang-format off
 				switch (argv[i][1]) {
 					case 'h': print_usage = true; continue;
-					case 'o': opt_out: SETVAL("Please specify an output file name after -o", ofilename = argv[i])
+					case 'o': opt_out: SETVAL("MUST NEEDS SPECIFY OUTPUT FILE NAME AFTER " Y "-o" R, ofilename = argv[i])
 					case 'g': opt_group_length: SETNUMBER("-g", gumsmaq_max_letter_group_count)
 					case 'l': opt_lines: SETNUMBER("-l", gumsmaq_max_line_count)
 					case 'k': opt_kern: SETNUMBER("-k", gumsmaq_letter_kern)
 					case 'b': opt_block_space: SETNUMBER("-b", gumsmaq_inter_block_space)
 					case 'i': opt_indent: SETNUMBER("-i", gumsmaq_group_indent_count)
-					case 'f': opt_file: SETVAL("Please specify an existing file after -f", infiles.push_back(new io::infile(argv[i], PerrorArgs)))
-					case 'm': opt_merge: collect = true; continue;
-					case 'M': opt_merge_files: collect_files = true; continue;
+					case 'f': opt_file: FatalArgs("OPTION " R Y "-f" RED " CURRENTLY NOT SUPPORTED"); //SETVAL("Please specify an existing file after " Y "-f" R, infile = new io::infile(argv[i], PerrorArgs))
 					case 't': opt_text: textual_mode = true; continue;
 					case 'N': opt_no_colour: no_colour = true; continue;
 					case 'v': opt_version: PrintVersion();
 					case 's':
 					opt_string:
-						SETVAL("Please specify a string after '-s'", input_text.emplace_back(argv[i]))
+						SETVAL("MUST NEEDS SPECIFY STRING AFTER " Y "-s" R, SetText(input_text, argv[i]))
 					case '-':
 						DEPTH(2, "--")
 						ALIAS("--help") { print_usage = true; verbose = true; continue; }
@@ -213,33 +233,42 @@ void HandleArguments(int argc, char** argv) {
 						ALIAS("--indent") goto opt_indent;
 						ALIAS("--file") goto opt_file;
 						ALIAS("--string") goto opt_string;
-						ALIAS("--merge") goto opt_merge;
-						ALIAS("--merge-files") goto opt_merge_files;
 						ALIAS("--text") goto opt_text;
 						ALIAS("--no-colour") goto opt_no_colour;
 						ALIAS("--version") goto opt_version;
+					default: FatalArgs("BAD OPTION \"" Y + string(argv[i]) + RED "\"" R);
 				}
-				// clang-format on
+
 			default:
-				if (input_text.empty()) input_text.emplace_back(argv[i]);
-				else
-					FatalArgs("Error: unknown option '" + string(argv[i]) + "'.");
+				if (input_text.empty()) SetText(input_text, argv[i]);
+				else FatalArgs("BAD OPTION \"" Y + string(argv[i])
+							   + R "\"\nDO NOTE THAT ONLY ONE STRING MAY BE SPECIFIED");
 		}
+		// clang-format on
 	}
 	if (print_usage) PrintUsage();
-	if (input_text.empty() && infiles.empty()) FatalArgs("Error: please specify a <string> or <file> to transliterate");
-	if (ofilename.empty()) ofilename = "gumsmaq.png";
+	if (input_text.empty() && !infile) FatalArgs("\"AND IF THOU GAZE LONG INTO AN ABYSS, THE ABYSS WILL GAZE BACK INTO THEE\"");
+	if (ofilename.empty()) ofilename = "gumsmaqqed.png";
 	gumsmaq_max_letter_group_count = max(1, gumsmaq_max_letter_group_count);
 	gumsmaq_max_line_count		   = max(1, gumsmaq_max_line_count);
 	gumsmaq_group_indent_count	   = clamp(gumsmaq_group_indent_count, 0, gumsmaq_max_letter_group_count - 1);
 }
 
 int main(int argc, char** argv) {
+#if !defined(WIN32) || defined(ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+	atexit(reset_colour);
+#endif
+
 	setlocale(LC_ALL, "");
+
+#ifdef WIN32
+	WindowsInit();
+#endif
 
 	HandleArguments(argc, argv);
 
-	// auto gumsmaq = Gumsmaq::VectorFromAbbr(input_text);
-	// auto img	 = Gumsmaq::Paragraph(gumsmaq);
-	// img.save(ofilename);
+	auto sgtf	 = input_text.empty() ? infile->mmap() : input_text;
+	auto gumsmaq = Gumsmaq::VectorFromAbbr(sgtf);
+	auto img	 = Gumsmaq::Paragraph(gumsmaq);
+	img.save(ofilename);
 }

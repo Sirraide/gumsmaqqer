@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(gumsmaqqer CXX C ASM)
 
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ..)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 file(GLOB SRC
         src/*.cc
@@ -24,7 +24,7 @@ add_executable(gumsmaqqer ${SRC})
 add_custom_command(
         COMMAND ./version.p6
         TARGET gumsmaqqer
-        WORKING_DIRECTORY ..
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

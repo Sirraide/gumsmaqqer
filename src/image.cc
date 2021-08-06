@@ -2,6 +2,8 @@
 
 #include "../lib/io.h"
 // clang-format off
+/// required because stb_image_write uses a variable called 'Y'
+#undef Y
 #define STB_IMAGE_IMPLEMENTATION
 #include "../lib/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -16,9 +18,9 @@ image::image(const std::string& filename) {
 	io::file<char, io::filemode::rb>(filename, io::perror_and_exit);
 	int ch;
 	if (data = stbi_load(filename.c_str(), &width, &height, &ch, 0), !data)
-		fatal("Could not load image from file '" + filename + "'");
+		fatal(RED, "Internal error: Could not load image from file " G + filename + R);
 	if (ch != channels)
-		fatal("Expected file with 4 channels, got " + to_string(ch));
+		fatal(RED, "BAD FILE (" G + to_string(ch) + RED "): MUST NEEDS SPECIFY FILE IN PNG FORMAT" R);
 	size = width * height * channels;
 	checksize();
 }
@@ -119,5 +121,5 @@ void image::WriteAtIfAlpha(int at_x, int at_y, const image& img) const {
 	CXX_WriteIfAlpha(img_data, where_start, img.width, width, m_height);
 }
 void image::checksize() const {
-	if (size < 0) fatal("An internal error occurred. Image size may not be less than zero!");
+	if (size < 0) fatal(RED, "Internal error: Image size may not be less than zero!" R);
 }
