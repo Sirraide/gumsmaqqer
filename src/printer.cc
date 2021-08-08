@@ -6,14 +6,14 @@
 using namespace std;
 
 namespace Textual {
-block& block::operator+=(ustring_t& vec) {
-	int spaces = gumsmaq_max_letter_group_count - vec.size();
-	if (spaces > 0) repeat(spaces) vec.push_back(FULLWIDTH_SPACE);
-	lines.push_back(vec);
+block& block::operator+=(u32string& ustr) {
+	int spaces = gumsmaq_max_letter_group_count - ustr.size();
+	if (spaces > 0) repeat(spaces) ustr.push_back(FULLWIDTH_SPACE);
+	lines.push_back(ustr);
 	return *this;
 }
 
-block& block::operator+=(const ustring_t& vec) {
+block& block::operator+=(const u32string& vec) {
 	lines.push_back(vec);
 	return *this;
 }
@@ -24,26 +24,16 @@ block& block::operator+=(const block& b) {
 	return *this;
 }
 
-uchar_t LoadLetter(const string& which) {
+char32_t LoadLetter(const string& which) {
 	if (!Letters::sgtf.contains(which)) fatal(RED_BOLD, "INVALID GUMSMAQ \"" RED + which + RED_BOLD "\"");
 	return Letters::sgtf.at(which);
 }
 
-ustring_t& operator+=(ustring_t& dest, const uchar_t& c) {
-	dest.push_back(c);
-	return dest;
-}
-
-ustring_t& operator+=(ustring_t& dest, const ustring_t& src) {
-	dest.insert(dest.end(), src.begin(), src.end());
-	return dest;
-}
-
 tuple<block, int, int> LetterGroup(const letter_group_t& lg, int letters_to_print, int sublines, bool indented) {
-	const uchar_t letter = LoadLetter(lg.first);
-	block		  group;
+	const char32_t letter = LoadLetter(lg.first);
+	block		   group;
 
-	vector<uchar_t> subline;
+	u32string subline;
 
 	auto max_letters_first_line = indented
 									  ? gumsmaq_max_letter_group_count - gumsmaq_group_indent_count
@@ -140,13 +130,11 @@ vector<block> Paragraph(const vector_t& groups) {
 	if (blocks.empty()) fatal(RED, "GUMSMAQQING YIELDED ONLY VAST EMPTINESS");
 	return blocks;
 }
-ustring_t Text(const vector_t& groups) {
-	auto	  blocks = Paragraph(groups);
-	ustring_t composed[gumsmaq_max_line_count];
-	ustring_t newline;
-	ustring_t inter_block_space;
-	ustring_t text;
-	repeat(CHARS_IN_NEWLINE) newline += unewline[iter__];
+u32string Text(const vector_t& groups) {
+	auto	  blocks   = Paragraph(groups);
+	auto*	  composed = new u32string[gumsmaq_max_line_count];
+	u32string inter_block_space;
+	u32string text;
 	repeat(gumsmaq_inter_block_space) inter_block_space += FULLWIDTH_SPACE;
 
 	for (size_t b_i = 0, bsize = blocks.size(); b_i < bsize; b_i++) {
@@ -160,9 +148,10 @@ ustring_t Text(const vector_t& groups) {
 
 	repeat(gumsmaq_max_line_count) {
 		text += composed[iter__];
-		text += newline;
+		text += UNEWLINE;
 	}
 
+	delete[] composed;
 	return text;
 }
 

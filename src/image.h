@@ -1,16 +1,17 @@
 #ifndef GUMSMAQQER_IMAGE_H
 #define GUMSMAQQER_IMAGE_H
 
+#include "utils.h"
+
 #include <string>
 #include <vector>
-#include "utils.h"
 
 using data_t = unsigned char;
 
 #ifdef WIN32
 __pragma(pack(push, 1))
 #endif
-struct GUMSMAQ_PACKED pixel {
+	struct GUMSMAQ_PACKED pixel {
 	data_t r;
 	data_t g;
 	data_t b;

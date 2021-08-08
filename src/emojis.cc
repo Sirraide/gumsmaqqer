@@ -5,8 +5,8 @@
 namespace Letters {
 
 #define EMOJI(name) \
-{ #name, Letters::name }
-const std::unordered_map<std::string, unsigned> names = {
+	{ #name, Letters::name }
+const std::unordered_map<std::string, char32_t> names = {
 	EMOJI(green_apple),
 	EMOJI(apple),
 	EMOJI(pear),
@@ -133,8 +133,8 @@ const std::unordered_map<std::string, unsigned> names = {
 
 #undef EMOJI
 #define EMOJI(str, name) \
-{ str, Letters::name }
-const std::unordered_map<std::string, unsigned> sgtf = {
+	{ str, Letters::name }
+const std::unordered_map<std::string, char32_t> sgtf = {
 	EMOJI("gA", green_apple),
 	EMOJI("A", apple),
 	EMOJI("P", pear),
@@ -263,4 +263,4 @@ const std::unordered_map<std::string, unsigned> sgtf = {
 	EMOJI("NACL", salt),
 };
 
-}
+} // namespace Letters

@@ -137,8 +137,8 @@ struct file {
 	}
 
 	/// Write up to n bytes to the file.
-	auto raw(void* data, size_t n_bytes) noexcept -> size_t requires Writable<M> && ByteMode<M> {
-		return fwrite(data, 1, n_bytes, handle);
+	auto raw(void* data, size_t el_size, size_t n) noexcept -> size_t requires Writable<M> && ByteMode<M> {
+		return fwrite(data, el_size, n, handle);
 	}
 
 	/// Read a single character from the file.
@@ -215,9 +215,9 @@ struct file {
 	/// Write a string to the file.
 	void write(string_t str) requires Writable<M> {
 		if constexpr (std::is_same_v<char_type_t, char>)
-			printf("%s", str.c_str());
+			fprintf(handle, "%s", str.c_str());
 		if constexpr (std::is_same_v<char_type_t, wchar_t>)
-			printf("%ls", str.c_str());
+			fprintf(handle, "%ls", str.c_str());
 	}
 
 	/// Format and write a string to the file.

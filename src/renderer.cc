@@ -38,12 +38,6 @@ vector_t VectorFromAbbr(const string& str) {
 	return ret;
 }
 
-string VectorToUnicode(const vector_t& gumsmaq) {
-	string out;
-	for (const auto& g : gumsmaq) repeat(g.second) out += Letters::sgtf.at(g.first);
-	return out;
-}
-
 const image& LoadLetter(const string& which) {
 	static unordered_map<string, image> cached_letters;
 #ifdef WIN32
@@ -198,7 +192,7 @@ image Paragraph(const vector_t& groups) {
 		ht = gumsmaq_max_line_count * GUMSMAQ_LINE_HEIGHT;
 
 	const int inter_block_space = gumsmaq_inter_block_space * GUMSMAQ_LOGOGRAM_WIDTH;
-	image img{bsiz * GUMSMAQ_LINE_WIDTH + (bsiz - 1) * inter_block_space, ht};
+	image	  img{bsiz * GUMSMAQ_LINE_WIDTH + (bsiz - 1) * inter_block_space, ht};
 
 	int x = 0;
 	for (const auto& block : blocks) {

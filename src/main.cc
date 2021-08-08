@@ -11,75 +11,46 @@
 #include <cstring>
 using namespace std;
 
-int gumsmaq_max_letter_group_count = 10;
-int gumsmaq_max_line_count		   = 10;
-int gumsmaq_letter_kern			   = -(72 / 3);
-int gumsmaq_group_indent_count	   = 1;
-int gumsmaq_inter_block_space	   = 1;
-int gumsmaq_max_block_count		   = 1;
-
-bool collect	   = false;
-bool collect_files = false;
-bool textual_mode  = false;
-bool no_colour	   = false;
-bool print_usage   = false;
-bool verbose	   = false;
-bool to_file	   = false;
-
-#ifndef WIN32
-uchar_t unewline[CHARS_IN_NEWLINE] = {L'\n'};
-#else
-uchar_t unewline[CHARS_IN_NEWLINE] = {L'\r', L'\n'};
-#endif
+bool collect		 = false;
+bool collect_files	 = false;
+bool textual_mode	 = false;
+bool no_colour		 = false;
+bool print_usage	 = false;
+bool verbose		 = false;
+bool to_file		 = false;
+bool do_reset_colour = true;
 
 string		ofilename;
 io::infile* infile;
 string		input_text;
 
-const string help_message = RED "\nEIDOLA OF PRODIGIOUS INEPTITUDE MAY AVAIL THEIR PITIFUL SELVES OF " R Y "-h" R;
-
 #ifdef WIN32
-void WindowsInit() {
-// enable ansi colour printing
 #	ifdef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+static DWORD omode, emode;
+
+void EnableVirtualTerminalProcessing() {
+	// enable ansi colour printing
 	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
 	HANDLE err = GetStdHandle(STD_ERROR_HANDLE);
-	DWORD  omode, emode;
 	GetConsoleMode(out, &omode);
 	GetConsoleMode(err, &emode);
 	SetConsoleMode(out, omode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 	SetConsoleMode(err, emode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+	do_reset_colour = true;
+	reset_colour();
+}
+
+void DisableVirtualTerminalProcessing() {
+	// enable ansi colour printing
+	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+	HANDLE err = GetStdHandle(STD_ERROR_HANDLE);
+	if (do_reset_colour) reset_colour();
+	SetConsoleMode(out, omode);
+	SetConsoleMode(err, emode);
+	do_reset_colour = false;
+}
 #	endif
-}
 #endif
-
-void reset_colour() {
-	cout << R;
-}
-
-int Number(const char* arg) {
-	try {
-		long l = strtol(arg, nullptr, 10);
-		return int(l);
-	} catch (exception& ignored) { fatal(RED, "BAD NUMBER \"" G + string(arg)); }
-}
-
-void SetText(string& what, const char* arg) {
-	what = arg;
-	if (what.starts_with('\"') || what.starts_with('\'')) what = what.substr(1);
-	if (what.ends_with('\"') || what.ends_with('\'')) what.erase(what.size() - 1);
-}
-
-// clang-format off
-string RemoveColour(string& str) {
-	for (;;) {
-		auto pos = str.find('\033');
-		if (pos == string::npos) break;
-		str.replace(pos, str[pos + 2] == '0' ? 4 : str[pos + 3] == ';' ? 7 : 5, "");
-	}
-	return str;
-}
-// clang-format on
 
 GUMSMAQ_NORETURN inline void FatalArgs(const string& errmsg) {
 	string err = RED + errmsg;
@@ -132,6 +103,11 @@ GUMSMAQ_NORETURN void PrintUsage() {
 		  "\033[1;33m"
 		  "Gumsmaqqer\n" R Y
 		  "Converts SGTF (Standard Visual Transcription Form) to either Unicode or PNG\n\n"
+#ifdef WIN32
+		RED "Note that on Windows, Gumsmaq text output does not work in\n"
+		  "the regular cmd or PowerShell. To use " Y "--text" RED " on Windows,\n"
+		  "download and install " G "Windows Terminal" R ".\n\n" R
+#endif
 		  "Usage: " B EXECUTABLE_NAME Y " [ OPTIONS ]" G " <sgtf> " Y "[ OPTIONS ]\n"
 		  "\n"
 		  "  " G "<sgtf>" R " can be either:\n" Y
@@ -264,14 +240,14 @@ void HandleArguments(int argc, char** argv) {
 }
 
 int main(int argc, char** argv) {
-#if !defined(WIN32) || defined(ENABLE_VIRTUAL_TERMINAL_PROCESSING)
-	atexit(reset_colour);
+#if defined(WIN32) && defined(ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+	atexit(DisableVirtualTerminalProcessing);
 #endif
 
-	setlocale(LC_ALL, "");
+	setlocale(LC_ALL, "en_US.utf-8");
 
-#ifdef WIN32
-	WindowsInit();
+#if defined(WIN32) && defined(ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+	EnableVirtualTerminalProcessing();
 #endif
 
 	HandleArguments(argc, argv);
@@ -280,13 +256,10 @@ int main(int argc, char** argv) {
 	auto gumsmaq = Visual::VectorFromAbbr(sgtf);
 
 	if (textual_mode) {
-		auto t = Textual::Text(gumsmaq);
-		if (!to_file) wcout << t;
-		else {
-			io::wofile out(ofilename, io::perror_and_exit);
-			for(auto uc : t) out.write(uc);
-		}
-
+		auto text = ToUTF8(Textual::Text(gumsmaq));
+		if (!to_file) cout << text;
+		else
+			io::ofile(ofilename, io::perror_and_exit).write(text);
 	} else {
 		auto img = Visual::Paragraph(gumsmaq);
 		img.save(ofilename);

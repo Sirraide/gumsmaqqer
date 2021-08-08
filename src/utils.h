@@ -8,8 +8,6 @@
 #include <iostream>
 #include <string>
 
-using uchar_t = unsigned;
-
 #define Y		 "\033[33m"
 #define B		 "\033[36m"
 #define M		 "\033[35m"
@@ -22,7 +20,7 @@ using uchar_t = unsigned;
 #define FULLWIDTH_SPACE 0x3000
 
 #define GUMSMAQQER_MAJOR_VERSION 0
-#define GUMSMAQQER_MINOR_VERSION 8
+#define GUMSMAQQER_MINOR_VERSION 9
 #define GUMSMAQQER_VERSION        \
 	STR(GUMSMAQQER_MAJOR_VERSION) \
 	"." STR(GUMSMAQQER_MINOR_VERSION) "." STR(GUMSMAQQER_PATCH_VERSION)
@@ -30,7 +28,7 @@ using uchar_t = unsigned;
 #ifdef WIN32
 #	define GUMSMAQ_NORETURN __declspec(noreturn)
 #	define GUMSMAQ_PACKED
-#	define NEWLINE "\r\n"
+#	define NEWLINE			 "\r\n"
 #	define CHARS_IN_NEWLINE 2
 template <typename T>
 inline T clamp(T val, T lo, T hi) {
@@ -45,6 +43,7 @@ inline T clamp(T val, T lo, T hi) {
 #endif
 
 #define WNEWLINE CAT(L, NEWLINE)
+#define UNEWLINE CAT(U, NEWLINE)
 
 #ifdef DEBUG_BUILD
 //#define DEBUG_DO_THROW
@@ -75,13 +74,17 @@ GUMSMAQ_NORETURN inline void fatal(const std::string colour, const std::string& 
 }
 #endif
 
-extern uchar_t unewline[CHARS_IN_NEWLINE];
-
 extern int gumsmaq_max_letter_group_count;
 extern int gumsmaq_max_line_count;
 extern int gumsmaq_letter_kern;
 extern int gumsmaq_group_indent_count;
 extern int gumsmaq_inter_block_space;
 extern int gumsmaq_max_block_count;
+
+void		reset_colour();
+int			Number(const char* arg);
+void		SetText(std::string& what, const char* arg);
+std::string RemoveColour(std::string& str);
+std::string ToUTF8(const std::u32string& what);
 
 #endif // GUMSMAQQER_UTILS_H
