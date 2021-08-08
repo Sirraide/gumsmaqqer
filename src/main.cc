@@ -3,6 +3,7 @@
 #endif
 
 #include "../lib/io.h"
+#include "printer.h"
 #include "renderer.h"
 #include "utils.h"
 
@@ -14,7 +15,8 @@ int gumsmaq_max_letter_group_count = 10;
 int gumsmaq_max_line_count		   = 10;
 int gumsmaq_letter_kern			   = -(72 / 3);
 int gumsmaq_group_indent_count	   = 1;
-int gumsmaq_inter_block_space	   = 15;
+int gumsmaq_inter_block_space	   = 1;
+int gumsmaq_max_block_count		   = 1;
 
 bool collect	   = false;
 bool collect_files = false;
@@ -22,6 +24,13 @@ bool textual_mode  = false;
 bool no_colour	   = false;
 bool print_usage   = false;
 bool verbose	   = false;
+bool to_file	   = false;
+
+#ifndef WIN32
+uchar_t unewline[CHARS_IN_NEWLINE] = {L'\n'};
+#else
+uchar_t unewline[CHARS_IN_NEWLINE] = {L'\r', L'\n'};
+#endif
 
 string		ofilename;
 io::infile* infile;
@@ -91,7 +100,7 @@ GUMSMAQ_NORETURN void PerrorArgs(const string& filename) {
 GUMSMAQ_NORETURN void PrintVersion() {
 	static const string version_info = Y "This is version " B GUMSMAQQER_VERSION Y " of the "
 										 "\033[1;33mGUMSMAQQER\n" R Y
-										 "Converts SGTF (Standard Gumsmaq Transcription Form) to either Unicode or PNG\n"
+										 "Converts SGTF (Standard Visual Transcription Form) to either Unicode or PNG\n"
 										 "See also --help for more detailed information\n" R;
 	cout << version_info << flush;
 	exit(0);
@@ -100,9 +109,9 @@ GUMSMAQ_NORETURN void PrintVersion() {
 GUMSMAQ_NORETURN void PrintUsage() {
 	static const string usage =
 		Y "See also --help for more detailed information\n\n"
-		  "Usage: " B EXECUTABLE_NAME Y " [ OPTIONS ]" G " <data> " Y "[ OPTIONS ]\n"
+		  "Usage: " B EXECUTABLE_NAME Y " [ OPTIONS ]" G " <lines> " Y "[ OPTIONS ]\n"
 		  "\n"
-		  "  " G "<data>" R " can be " Y "[ -s" R ", " Y "--string ] " G "<string>" R " or " Y "-f" R ", " Y "--file " G "<file>\n" R
+		  "  " G "<lines>" R " can be " Y "[ -s" R ", " Y "--string ] " G "<string>" R " or " Y "-f" R ", " Y "--file " G "<file>\n" R
 		  "\n"
 		  "  OPTIONS:\n"
 		  "      " Y "-h" R ", " Y "--help" R "              Display help information. Note that " Y "--help" R " is much more\n"
@@ -122,7 +131,7 @@ GUMSMAQ_NORETURN void PrintUsage() {
 		Y "This is version " B GUMSMAQQER_VERSION Y " of the "
 		  "\033[1;33m"
 		  "Gumsmaqqer\n" R Y
-		  "Converts SGTF (Standard Gumsmaq Transcription Form) to either Unicode or PNG\n\n"
+		  "Converts SGTF (Standard Visual Transcription Form) to either Unicode or PNG\n\n"
 		  "Usage: " B EXECUTABLE_NAME Y " [ OPTIONS ]" G " <sgtf> " Y "[ OPTIONS ]\n"
 		  "\n"
 		  "  " G "<sgtf>" R " can be either:\n" Y
@@ -209,7 +218,7 @@ void HandleArguments(int argc, char** argv) {
 				DEPTH(1, "-")
 				switch (argv[i][1]) {
 					case 'h': print_usage = true; continue;
-					case 'o': opt_out: SETVAL("MUST NEEDS SPECIFY OUTPUT FILE NAME AFTER " Y "-o" R, ofilename = argv[i])
+					case 'o': opt_out: SETVAL("MUST NEEDS SPECIFY OUTPUT FILE NAME AFTER " Y "-o" R, ofilename = argv[i]; to_file = true)
 					case 'g': opt_group_length: SETNUMBER("-g", gumsmaq_max_letter_group_count)
 					case 'l': opt_lines: SETNUMBER("-l", gumsmaq_max_line_count)
 					case 'k': opt_kern: SETNUMBER("-k", gumsmaq_letter_kern)
@@ -268,7 +277,18 @@ int main(int argc, char** argv) {
 	HandleArguments(argc, argv);
 
 	auto sgtf	 = input_text.empty() ? infile->mmap() : input_text;
-	auto gumsmaq = Gumsmaq::VectorFromAbbr(sgtf);
-	auto img	 = Gumsmaq::Paragraph(gumsmaq);
-	img.save(ofilename);
+	auto gumsmaq = Visual::VectorFromAbbr(sgtf);
+
+	if (textual_mode) {
+		auto t = Textual::Text(gumsmaq);
+		if (!to_file) wcout << t;
+		else {
+			io::wofile out(ofilename, io::perror_and_exit);
+			for(auto uc : t) out.write(uc);
+		}
+
+	} else {
+		auto img = Visual::Paragraph(gumsmaq);
+		img.save(ofilename);
+	}
 }

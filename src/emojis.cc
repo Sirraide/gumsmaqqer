@@ -2,9 +2,11 @@
 
 #include "utils.h"
 
+namespace Letters {
+
 #define EMOJI(name) \
-	{ #name, Gumsmaq::name }
-const std::unordered_map<std::string, unsigned> name_gumsmaq_table = {
+{ #name, Letters::name }
+const std::unordered_map<std::string, unsigned> names = {
 	EMOJI(green_apple),
 	EMOJI(apple),
 	EMOJI(pear),
@@ -131,8 +133,8 @@ const std::unordered_map<std::string, unsigned> name_gumsmaq_table = {
 
 #undef EMOJI
 #define EMOJI(str, name) \
-	{ str, Gumsmaq::name }
-const std::unordered_map<std::string, unsigned> abbr_gumsmaq_table = {
+{ str, Letters::name }
+const std::unordered_map<std::string, unsigned> sgtf = {
 	EMOJI("gA", green_apple),
 	EMOJI("A", apple),
 	EMOJI("P", pear),
@@ -260,3 +262,5 @@ const std::unordered_map<std::string, unsigned> abbr_gumsmaq_table = {
 	EMOJI("CHOP", chopsticks),
 	EMOJI("NACL", salt),
 };
+
+}

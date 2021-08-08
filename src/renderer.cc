@@ -9,7 +9,7 @@
 #include <unordered_map>
 using namespace std;
 
-namespace Gumsmaq {
+namespace Visual {
 #define CONTINUE          \
 	if (it == end) break; \
 	else                  \
@@ -40,7 +40,7 @@ vector_t VectorFromAbbr(const string& str) {
 
 string VectorToUnicode(const vector_t& gumsmaq) {
 	string out;
-	for (const auto& g : gumsmaq) repeat(g.second) out += abbr_gumsmaq_table.at(g.first);
+	for (const auto& g : gumsmaq) repeat(g.second) out += Letters::sgtf.at(g.first);
 	return out;
 }
 
@@ -52,9 +52,9 @@ const image& LoadLetter(const string& which) {
 	static const string img_root = "twemoji/assets/72x72/";
 #endif
 	if (!cached_letters.contains(which)) {
-		if (!abbr_gumsmaq_table.contains(which)) fatal(RED_BOLD, "INVALID GUMSMAQ \"" RED + which + RED_BOLD "\"");
+		if (!Letters::sgtf.contains(which)) fatal(RED_BOLD, "INVALID GUMSMAQ \"" RED + which + RED_BOLD "\"");
 		stringstream stream;
-		stream << hex << (int) abbr_gumsmaq_table.at(which);
+		stream << hex << (int) Letters::sgtf.at(which);
 		string img_path = img_root + stream.str() + ".png";
 		image  letter(img_path);
 		cached_letters.insert({which, move(letter)});
@@ -62,7 +62,7 @@ const image& LoadLetter(const string& which) {
 	return cached_letters.at(which);
 }
 
-image ArrangeGroup(const letter_group_t& lg, int start_index, int letter_count) {
+image Subline(const letter_group_t& lg, int start_index, int letter_count) {
 	image img{letter_count * GUMSMAQ_LOGOGRAM_WIDTH + (letter_count - 1) * gumsmaq_letter_kern,
 		letter_count == 1 ? GUMSMAQ_LOGOGRAM_HEIGHT : GUMSMAQ_LINE_HEIGHT};
 	int	  x = 0, y = 0, stride = GUMSMAQ_LOGOGRAM_WIDTH + gumsmaq_letter_kern;
@@ -85,7 +85,7 @@ image LetterGroup(const letter_group_t& group, bool indented) {
 	vector<image> lines;
 	if (group.second > first_count) {
 		int	  remaining = group.second - first_count;
-		image first		= ArrangeGroup(group, 0, first_count);
+		image first		= Subline(group, 0, first_count);
 
 		int count		 = max_count_indented;
 		int count_groups = remaining / count;
@@ -93,12 +93,12 @@ image LetterGroup(const letter_group_t& group, bool indented) {
 		int start_index = first_count;
 		for (int i = 0; i < count_groups; i++) {
 			start_index += count;
-			lines.push_back(ArrangeGroup(group, start_index, count));
+			lines.push_back(Subline(group, start_index, count));
 		}
 
 		image last;
 		if (remaining % count)
-			last = ArrangeGroup(group, start_index + count, remaining % count);
+			last = Subline(group, start_index + count, remaining % count);
 
 		int ht = GUMSMAQ_LINE_HEIGHT;
 		ht += GUMSMAQ_LINE_HEIGHT * lines.size();
@@ -115,7 +115,7 @@ image LetterGroup(const letter_group_t& group, bool indented) {
 		if (remaining % count > 0)
 			img.WriteAtIfAlpha(GUMSMAQ_GROUP_INDENT_WIDTH, y, last);
 	} else {
-		image line = ArrangeGroup(group, 0, group.second);
+		image line = Subline(group, 0, group.second);
 		img		   = image{GUMSMAQ_LINE_WIDTH, GUMSMAQ_LINE_HEIGHT};
 		img.WriteAtIfAlpha(indented ? GUMSMAQ_GROUP_INDENT_WIDTH : 0, 0, line);
 	}
@@ -142,9 +142,10 @@ image Paragraph(const vector_t& groups) {
 			/// this part is the worst...
 			int line_diff = group.second / max_count_indented;
 			if (group.second == 1) line_diff = 1;
-			else if (int mod = group.second - 1; group.second % max_count_indented
-												 && mod > 0
-												 && mod % max_count_indented)
+			else if (int mod = group.second - 1;
+					 group.second % max_count_indented
+					 && mod > 0
+					 && mod % max_count_indented)
 				line_diff++;
 			remaining_lines -= line_diff;
 
@@ -172,9 +173,10 @@ image Paragraph(const vector_t& groups) {
 				/// ... and this part ...
 				int line_diff = letters_to_print / max_count_indented;
 				if (letters_to_print == 1) line_diff = 1;
-				else if (int mod = letters_to_print - 1; letters_to_print % max_count_indented
-														 && mod > 0
-														 && mod % max_count_indented)
+				else if (int mod = letters_to_print - 1;
+						 letters_to_print % max_count_indented
+						 && mod > 0
+						 && mod % max_count_indented)
 					line_diff++;
 				remaining_lines = gumsmaq_max_line_count - line_diff;
 			} else
@@ -184,17 +186,19 @@ image Paragraph(const vector_t& groups) {
 	if (!current_block.empty())
 		blocks.push_back(current_block);
 
-	if(blocks.empty())
+	if (blocks.empty())
 		fatal(RED, "GUMSMAQQING YIELDED ONLY VAST EMPTINESS");
 
-	int bsiz = blocks.size();
+	const int bsiz = blocks.size();
 	if (!bsiz) return image{0, 0};
 	int ht = 0;
 	if (blocks.size() == 1)
 		for (const auto& block : blocks[0]) ht += block.height;
 	else
 		ht = gumsmaq_max_line_count * GUMSMAQ_LINE_HEIGHT;
-	image img{bsiz * GUMSMAQ_LINE_WIDTH + (bsiz - 1) * gumsmaq_inter_block_space, ht};
+
+	const int inter_block_space = gumsmaq_inter_block_space * GUMSMAQ_LOGOGRAM_WIDTH;
+	image img{bsiz * GUMSMAQ_LINE_WIDTH + (bsiz - 1) * inter_block_space, ht};
 
 	int x = 0;
 	for (const auto& block : blocks) {
@@ -205,10 +209,11 @@ image Paragraph(const vector_t& groups) {
 			yy += lgroup.height;
 		}
 		img.WriteAtIfAlpha(x, 0, block_img);
-		x += block_img.width + gumsmaq_inter_block_space;
+		x += block_img.width + inter_block_space;
 	}
 
 	return img;
 }
 #undef max_count
-} // namespace Gumsmaq
+
+} // namespace Visual

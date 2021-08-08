@@ -8,6 +8,8 @@
 #include <iostream>
 #include <string>
 
+using uchar_t = unsigned;
+
 #define Y		 "\033[33m"
 #define B		 "\033[36m"
 #define M		 "\033[35m"
@@ -17,8 +19,10 @@
 #define RED		 "\033[31m"
 #define RED_BOLD "\033[1;31m"
 
+#define FULLWIDTH_SPACE 0x3000
+
 #define GUMSMAQQER_MAJOR_VERSION 0
-#define GUMSMAQQER_MINOR_VERSION 7
+#define GUMSMAQQER_MINOR_VERSION 8
 #define GUMSMAQQER_VERSION        \
 	STR(GUMSMAQQER_MAJOR_VERSION) \
 	"." STR(GUMSMAQQER_MINOR_VERSION) "." STR(GUMSMAQQER_PATCH_VERSION)
@@ -26,6 +30,8 @@
 #ifdef WIN32
 #	define GUMSMAQ_NORETURN __declspec(noreturn)
 #	define GUMSMAQ_PACKED
+#	define NEWLINE "\r\n"
+#	define CHARS_IN_NEWLINE 2
 template <typename T>
 inline T clamp(T val, T lo, T hi) {
 	return val < lo ? lo : val > hi ? hi
@@ -34,7 +40,11 @@ inline T clamp(T val, T lo, T hi) {
 #else
 #	define GUMSMAQ_NORETURN __attribute__((noreturn))
 #	define GUMSMAQ_PACKED	 __attribute__((packed))
+#	define NEWLINE			 "\n"
+#	define CHARS_IN_NEWLINE 1
 #endif
+
+#define WNEWLINE CAT(L, NEWLINE)
 
 #ifdef DEBUG_BUILD
 //#define DEBUG_DO_THROW
@@ -63,19 +73,15 @@ GUMSMAQ_NORETURN inline void fatal(const std::string colour, const std::string& 
 			  << "\nEIDOLA OF PRODIGIOUS INEPTITUDE MAY AVAIL THEIR PITIFUL SELVES OF " R Y "-h" R "\n";
 	exit(1);
 }
-//GUMSMAQ_NORETURN inline void fatal(const std::wstring colour, const std::wstring& err) noexcept {
-//	std::wcerr << err << R << colour << L"\nABORTED AND SUNKEN INTO DESPAIR"
-//	<< L"\nEIDOLA OF PRODIGIOUS INEPTITUDE MAY AVAIL THEIR PITIFUL SELVES OF " R Y "-h" R "\n";
-//	exit(1);
-//}
 #endif
 
-std::wstring strtowcs(const std::string& str);
+extern uchar_t unewline[CHARS_IN_NEWLINE];
 
 extern int gumsmaq_max_letter_group_count;
 extern int gumsmaq_max_line_count;
 extern int gumsmaq_letter_kern;
 extern int gumsmaq_group_indent_count;
 extern int gumsmaq_inter_block_space;
+extern int gumsmaq_max_block_count;
 
 #endif // GUMSMAQQER_UTILS_H

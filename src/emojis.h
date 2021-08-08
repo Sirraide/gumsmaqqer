@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace Gumsmaq {
+namespace Letters {
 enum : unsigned {
 	green_apple			= 127823, // L'🍏'
 	apple				= 127822, // L'🍎'
@@ -130,11 +130,9 @@ enum : unsigned {
 	salt				= 129474, // L'🧂'
 };
 
+extern const std::unordered_map<std::string, unsigned> names;
+extern const std::unordered_map<std::string, unsigned> sgtf;
+
 }
-
-extern const std::unordered_map<std::string, unsigned> name_gumsmaq_table;
-extern const std::unordered_map<std::string, unsigned> abbr_gumsmaq_table;
-
-#undef wchar_type_t
 
 #endif // GUMSMAQQER_EMOJIS_H

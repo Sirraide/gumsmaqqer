@@ -67,6 +67,11 @@ concept Readable = requires { requires(M != filemode::w) && (M != filemode::wb) 
 template <filemode M>
 concept Writable = requires { requires(M != filemode::r) && (M != filemode::rb); };
 
+template <filemode M>
+concept ByteMode = requires { requires(M == filemode::rb) || (M == filemode::wb) || (M == filemode::ab)
+							  || (M == filemode::rbplus) || (M == filemode::wbplus) || (M == filemode::abplus)
+							  || (M == filemode::rw); };
+
 template <typename char_type_t, filemode M>
 struct file {
 	using string_t = std::basic_string<char_type_t>;
@@ -124,11 +129,16 @@ struct file {
 #endif
 
 	/// Read up to n bytes from the file.
-	auto raw(size_t n) noexcept -> std::string requires Readable<M> {
+	auto raw(size_t n) noexcept -> std::string requires Readable<M> && ByteMode<M> {
 		std::string ret;
 		ret.reserve(n);
 		fread(&ret[0], 1, n, handle);
 		return ret;
+	}
+
+	/// Write up to n bytes to the file.
+	auto raw(void* data, size_t n_bytes) noexcept -> size_t requires Writable<M> && ByteMode<M> {
+		return fwrite(data, 1, n_bytes, handle);
 	}
 
 	/// Read a single character from the file.
