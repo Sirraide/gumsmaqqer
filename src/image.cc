@@ -116,7 +116,7 @@ void CXX_WriteIfAlpha(pixel* img_data, pixel* where_start,
 
 void image::WriteAtIfAlpha(int at_x, int at_y, const image& img) const {
 	pixel* where_start = begin() + at_x + at_y * width;
-	pixel* img_data	   = img.begin();
+	pixel* img_data	   reinterpret_cast<pixel*>(data)= img.begin();
 	int	   m_height	   = min(height - at_y, img.height);
 	CXX_WriteIfAlpha(img_data, where_start, img.width, width, m_height);
 }

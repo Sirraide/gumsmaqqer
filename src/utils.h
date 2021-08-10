@@ -67,7 +67,7 @@ inline T clamp(T val, T lo, T hi) {
 #if defined(DEBUG_BUILD) && defined(DEBUG_DO_THROW)
 #	define fatal(...) throw std::runtime_error(__FILE__ ":" STR(__LINE__))
 #else
-GUMSMAQ_NORETURN inline void fatal(const std::string colour, const std::string& err) noexcept {
+GUMSMAQ_NORETURN inline void fatal(const std::string& colour, const std::string& err) noexcept {
 	std::cerr << colour << err << R << colour << "\nABORTED AND SUNKEN INTO DESPAIR"
 			  << "\nEIDOLA OF PRODIGIOUS INEPTITUDE MAY AVAIL THEIR PITIFUL SELVES OF " R Y "-h" R "\n";
 	exit(1);
