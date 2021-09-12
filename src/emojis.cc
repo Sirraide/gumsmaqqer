@@ -164,7 +164,7 @@ const std::unordered_map<std::string, char32_t> sgtf = {
 	EMOJI("CN", corn),
 	EMOJI("C", carrot),
 	EMOJI("GA", garlic),
-	EMOJI("0", onion),
+	EMOJI("ZERO", onion),
 	EMOJI("PT", potato),
 	EMOJI("sPT", sweet_potato),
 	EMOJI("cBR", croissant),
