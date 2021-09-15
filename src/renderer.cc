@@ -41,9 +41,9 @@ vector_t VectorFromAbbr(const string& str) {
 const image& LoadLetter(const string& which) {
 	static unordered_map<string, image> cached_letters;
 #ifdef WIN32
-	static const string img_root = "twemoji\\assets\\72x72\\";
+	static const string img_root = assets_dir + "twemoji\\assets\\72x72\\";
 #else
-	static const string img_root = "twemoji/assets/72x72/";
+	static const string img_root = assets_dir + "twemoji/assets/72x72/";
 #endif
 	if (!cached_letters.contains(which)) {
 		if (!Letters::sgtf.contains(which)) fatal(RED_BOLD, "INVALID GUMSMAQ \"" RED + which + RED_BOLD "\"");

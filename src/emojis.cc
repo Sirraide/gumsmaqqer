@@ -261,6 +261,7 @@ const std::unordered_map<std::string, char32_t> sgtf = {
 	EMOJI("tbNOT_FOOD", takeout_box),
 	EMOJI("CHOP", chopsticks),
 	EMOJI("NACL", salt),
+	EMOJI("NHCL", salt),
 };
 
 } // namespace Letters

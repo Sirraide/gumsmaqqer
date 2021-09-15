@@ -19,8 +19,8 @@
 
 #define FULLWIDTH_SPACE 0x3000
 
-#define GUMSMAQQER_MAJOR_VERSION 0
-#define GUMSMAQQER_MINOR_VERSION 9
+#define GUMSMAQQER_MAJOR_VERSION 1
+#define GUMSMAQQER_MINOR_VERSION 0
 #define GUMSMAQQER_VERSION        \
 	STR(GUMSMAQQER_MAJOR_VERSION) \
 	"." STR(GUMSMAQQER_MINOR_VERSION) "." STR(GUMSMAQQER_PATCH_VERSION)
@@ -80,6 +80,8 @@ extern int gumsmaq_letter_kern;
 extern int gumsmaq_group_indent_count;
 extern int gumsmaq_inter_block_space;
 extern int gumsmaq_max_block_count;
+
+extern std::string assets_dir;
 
 void		reset_colour();
 int			Number(const char* arg);

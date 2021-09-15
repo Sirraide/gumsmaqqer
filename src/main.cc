@@ -8,6 +8,7 @@
 #include "utils.h"
 
 #include <clocale>
+#include <cstdlib>
 #include <cstring>
 using namespace std;
 
@@ -20,6 +21,7 @@ bool verbose		 = false;
 bool to_file		 = false;
 bool do_reset_colour = true;
 
+string		assets_dir;
 string		ofilename;
 io::infile* infile;
 string		input_text;
@@ -240,6 +242,11 @@ void HandleArguments(int argc, char** argv) {
 }
 
 int main(int argc, char** argv) {
+	char* _assets_dir = std::getenv("GUMSMAQQER_ASSETS_DIR");
+	if (!_assets_dir) fatal(RED, "ENVIRONMENT VARIABLE " Y "GUMSMAQQER_ASSETS_DIR" RED " MUST BE SET TO DIRECTORY CONTAINING " Y "twemoji/assets/72x72" RED);
+	assets_dir = _assets_dir;
+	if (!assets_dir.ends_with('/')) assets_dir += '/';
+
 #if defined(WIN32) && defined(ENABLE_VIRTUAL_TERMINAL_PROCESSING)
 	atexit(DisableVirtualTerminalProcessing);
 #endif
