@@ -1,6 +1,9 @@
 # GUMSMAQQER
 This is the GUMSMAQQER
 
+## Emojis
+You need the `assets` folder from https://github.com/twitter/twemoji
+
 ## Executable
 Windows: [gumsmaqqer.exe](gumsmaqqer.exe)\
 Linux:   [gumsmaqqer](gumsmaqqer)
