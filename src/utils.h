@@ -20,7 +20,7 @@
 #define FULLWIDTH_SPACE 0x3000
 
 #define GUMSMAQQER_MAJOR_VERSION 1
-#define GUMSMAQQER_MINOR_VERSION 0
+#define GUMSMAQQER_MINOR_VERSION 1
 #define GUMSMAQQER_VERSION        \
 	STR(GUMSMAQQER_MAJOR_VERSION) \
 	"." STR(GUMSMAQQER_MINOR_VERSION) "." STR(GUMSMAQQER_PATCH_VERSION)
@@ -30,11 +30,6 @@
 #	define GUMSMAQ_PACKED
 #	define NEWLINE			 "\r\n"
 #	define CHARS_IN_NEWLINE 2
-template <typename T>
-inline T clamp(T val, T lo, T hi) {
-	return val < lo ? lo : val > hi ? hi
-									: val;
-}
 #else
 #	define GUMSMAQ_NORETURN __attribute__((noreturn))
 #	define GUMSMAQ_PACKED	 __attribute__((packed))
@@ -69,7 +64,7 @@ inline T clamp(T val, T lo, T hi) {
 #else
 GUMSMAQ_NORETURN inline void fatal(const std::string& colour, const std::string& err) noexcept {
 	std::cerr << colour << err << R << colour << "\nABORTED AND SUNKEN INTO DESPAIR"
-			  << "\nEIDOLA OF PRODIGIOUS INEPTITUDE MAY AVAIL THEIR PITIFUL SELVES OF " R Y "-h" R "\n";
+			  << "\nEIDOLA OF PRODIGIOUS INEPTITUDE MAY AVAIL THEIR PITIFUL SELVES OF " R Y "-H" R "\n";
 	exit(1);
 }
 #endif

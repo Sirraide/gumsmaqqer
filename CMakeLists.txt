@@ -21,11 +21,13 @@ endif ()
 
 add_executable(gumsmaqqer ${SRC})
 
+if (NOT (WIN32))
 add_custom_command(
         COMMAND ./version.p6
         TARGET gumsmaqqer
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        WORKING_DIRECTORY ..
 )
+endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(DEBUG_BUILD)
@@ -39,5 +41,9 @@ else ()
     else ()
         add_compile_options(-O3)
     endif ()
-    add_compile_options(-Wall -Wextra -Wundef -march=native -Wno-missing-field-initializers -Wno-sign-compare)
+add_compile_options(-Wall -Wextra -Wundef -Wno-missing-field-initializers -Wno-sign-compare)
 endif ()
+
+if (WIN32)
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+endif()
