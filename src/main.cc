@@ -253,7 +253,7 @@ int main(int argc, char** argv) {
 		pwd.reserve(100000);
 		wcstombs(pwd.data(), filesystem::current_path().c_str(), 100000);
 #endif
-		if (!_assets_dir) fatal(RED, string("GUMSMAQQING ASSETS FOUND WANTING\nENSURE EXISTENCE OF ASSETS DIRECTORY " Y "assets" RED " CONTAINING ASSETS IN " Y) + pwd + RED "\nELSE ENVIRONMENT VARIABLE " Y "GUMSMAQQER_ASSETS_DIR" RED " MUST BE SET TO ASSETS DIRECTORY " Y "assets" RED);
+		if (!_assets_dir) fatal(RED, string("GUMSMAQQING ASSETS FOUND WANTING\nENSURE EXISTENCE OF ASSETS DIRECTORY " Y "assets" RED " CONTAINING ASSETS IN " Y) + pwd + RED "\nELSE MUST NEEDS SET ENVIRONMENT VARIABLE " Y "GUMSMAQQER_ASSETS_DIR" RED " TO ASSETS DIRECTORY CONTAINING ASSETS");
 		assets_dir = _assets_dir;
 	}
 
