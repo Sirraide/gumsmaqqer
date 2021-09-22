@@ -17,3 +17,5 @@ First, clone the repo. Then:
 
 Linux: Run `./build.sh`.\
 Windows: Use Visual Studio.
+
+PS: You will get warnings on Windows because Windows is Windows.
