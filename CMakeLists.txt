@@ -15,7 +15,6 @@ file(GLOB SRC
 if (MSVC)
     add_compile_definitions(EXECUTABLE_NAME="gumsmaqqer.exe")
 else ()
-    set(CMAKE_CXX_COMPILER clang++)
     add_compile_definitions(EXECUTABLE_NAME="gumsmaqqer")
 endif ()
 
