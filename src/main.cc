@@ -7,6 +7,7 @@
 #include "renderer.h"
 #include "utils.h"
 
+#include <cctype>
 #include <clocale>
 #include <cstdlib>
 #include <cstring>
@@ -253,7 +254,10 @@ int main(int argc, char** argv) {
 		pwd.reserve(100000);
 		wcstombs(pwd.data(), filesystem::current_path().c_str(), 100000);
 #endif
-		if (!_assets_dir) fatal(RED, string("GUMSMAQQING ASSETS FOUND WANTING\nENSURE EXISTENCE OF ASSETS DIRECTORY " Y "assets" RED " CONTAINING ASSETS IN " Y) + pwd + RED "\nELSE MUST NEEDS SET ENVIRONMENT VARIABLE " Y "GUMSMAQQER_ASSETS_DIR" RED " TO ASSETS DIRECTORY CONTAINING ASSETS");
+		if (!_assets_dir) fatal(RED, string("GUMSMAQQING ASSETS FOUND WANTING\nENSURE EXISTENCE OF ASSETS DIRECTORY " Y
+											"assets" RED " CONTAINING ASSETS IN " Y)
+										 + pwd + RED "\nELSE MUST NEEDS SET ENVIRONMENT VARIABLE " Y "GUMSMAQQER_ASSETS_DIR" //
+										 RED " TO ASSETS DIRECTORY CONTAINING ASSETS");
 		assets_dir = _assets_dir;
 	}
 
@@ -263,8 +267,8 @@ int main(int argc, char** argv) {
 
 	auto sgtf = input_text.empty() ? infile->mmap() : input_text;
 
-	if (sgtf.find(' ') != string::npos) {
-		fatal(RED, "HERETICALLY UNCONJOINED GUMSMAQ SHALL NOT BE TOLERATED");
+	for (const auto c : sgtf) {
+		if (isspace(c)) fatal(RED, "HERETICALLY UNCONJOINED GUMSMAQ SHALL NOT BE TOLERATED");
 	}
 
 	auto gumsmaq = Visual::VectorFromAbbr(sgtf);
