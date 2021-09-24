@@ -1,7 +1,7 @@
 #include "renderer.h"
 
-#include "emojis.h"
-#include "utils.h"
+#include "../lib/emojis.h"
+#include "../lib/utils.h"
 
 #include <cctype>
 #include <sstream>

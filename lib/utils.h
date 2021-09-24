@@ -1,8 +1,7 @@
 #ifndef GUMSMAQQER_UTILS_H
 #define GUMSMAQQER_UTILS_H
 
-#include "../lib/io.h"
-#include "version.h"
+#include "io.h"
 
 #include <cassert>
 #include <iostream>
@@ -18,12 +17,6 @@
 #define RED_BOLD "\033[1;31m"
 
 #define FULLWIDTH_SPACE 0x3000
-
-#define GUMSMAQQER_MAJOR_VERSION 1
-#define GUMSMAQQER_MINOR_VERSION 1
-#define GUMSMAQQER_VERSION        \
-	STR(GUMSMAQQER_MAJOR_VERSION) \
-	"." STR(GUMSMAQQER_MINOR_VERSION) "." STR(GUMSMAQQER_PATCH_VERSION)
 
 #ifdef WIN32
 #	define GUMSMAQ_NORETURN __declspec(noreturn)

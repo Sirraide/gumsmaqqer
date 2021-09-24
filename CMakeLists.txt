@@ -3,22 +3,34 @@ project(gumsmaqqer CXX C ASM)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
 
-file(GLOB SRC
+file(GLOB GUMSMAQQER_SRC
         src/*.cc
         src/*.h
         src/*.S
-        lib/*.h
-        lib/*.cc
         )
 
-if (MSVC)
-    add_compile_definitions(EXECUTABLE_NAME="gumsmaqqer.exe")
-else ()
-    add_compile_definitions(EXECUTABLE_NAME="gumsmaqqer")
-endif ()
+#file(GLOB TOOLS_SPRITESHEET_SRC
+#        tools/spritesheet.cc
+#        )
 
-add_executable(gumsmaqqer ${SRC})
+file(GLOB LIB
+        lib/*.cc
+        lib/*.h)
+
+add_library(gumsmaq SHARED ${LIB})
+add_executable(gumsmaqqer ${GUMSMAQQER_SRC})
+#add_executable(generate-spritesheets ${TOOLS_SPRITESHEET_SRC})
+
+target_link_libraries(gumsmaqqer gumsmaq)
+#target_link_libraries(generate-spritesheets gumsmaq)
+
+if (WIN32)
+    target_compile_definitions(gumsmaqqer PRIVATE EXECUTABLE_NAME="gumsmaqqer.exe")
+else ()
+    target_compile_definitions(gumsmaqqer PRIVATE EXECUTABLE_NAME="gumsmaqqer")
+endif ()
 
 if (NOT (WIN32))
     if (EXISTS "./version.p6")

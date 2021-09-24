@@ -1,7 +1,7 @@
 #ifndef GUMSMAQQER_PRINTER_H
 #define GUMSMAQQER_PRINTER_H
 #include "renderer.h"
-#include "utils.h"
+#include "../lib/utils.h"
 
 #include <iostream>
 #include <vector>

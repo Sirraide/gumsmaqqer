@@ -1,6 +1,6 @@
 #ifndef GUMSMAQQER_RENDERER_H
 #define GUMSMAQQER_RENDERER_H
-#include "image.h"
+#include "../lib/image.h"
 
 #include <string>
 #include <utility>

@@ -3,9 +3,16 @@
 #endif
 
 #include "../lib/io.h"
+#include "../lib/utils.h"
 #include "printer.h"
 #include "renderer.h"
-#include "utils.h"
+#include "version.h"
+
+#define GUMSMAQQER_MAJOR_VERSION 1
+#define GUMSMAQQER_MINOR_VERSION 1
+#define GUMSMAQQER_VERSION        \
+	STR(GUMSMAQQER_MAJOR_VERSION) \
+	"." STR(GUMSMAQQER_MINOR_VERSION) "." STR(GUMSMAQQER_PATCH_VERSION)
 
 #include <cctype>
 #include <clocale>

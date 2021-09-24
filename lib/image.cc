@@ -17,6 +17,7 @@ using namespace std;
 image::image(const std::string& filename) {
 	io::file<char, io::filemode::rb>(filename, io::perror_and_exit);
 	int ch;
+
 	if (data = stbi_load(filename.c_str(), &width, &height, &ch, 0), !data)
 		fatal(RED, "Internal error: Could not load image from file " G + filename + R);
 	if (ch != channels)

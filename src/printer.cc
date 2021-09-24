@@ -1,6 +1,6 @@
 #include "printer.h"
 
-#include "emojis.h"
+#include "../lib/emojis.h"
 
 #include <string>
 using namespace std;
