@@ -10,6 +10,15 @@ die() {
 	exit 1
 }
 
+ensure_dir() {
+  if [[ -d $1 ]]; then
+  	info "FOUND OLD DIRECTORY $1. ERASING..."
+  	rm -rf "$1"
+  fi
+
+  mkdir "$1"
+}
+
 set -eu
 
 if [[ $# -gt 0 ]]; then
@@ -26,13 +35,9 @@ if [[ $# -gt 0 ]]; then
 	die "UNKNOWN OPTION '$1'"
 fi
 
-if [[ -d './build' ]]; then
-	info 'FOUND OLD DIRECTORY ./build. ERASING...'
-	rm -rf ./build
-fi
-
-mkdir ./build
+ensure_dir ./build
 cd ./build
+
 
 info 'GENERATING BUILD FILES...'
 cmake -DCMAKE_BUILD_TYPE=Release ..

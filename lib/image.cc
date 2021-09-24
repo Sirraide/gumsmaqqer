@@ -14,6 +14,9 @@
 #include <cstdlib>
 
 using namespace std;
+
+namespace gsmq {
+
 image::image(const std::string& filename) {
 	io::file<char, io::filemode::rb>(filename, io::perror_and_exit);
 	int ch;
@@ -23,22 +26,22 @@ image::image(const std::string& filename) {
 	if (ch != channels)
 		fatal(RED, "BAD FILE (" G + to_string(ch) + RED "): MUST NEEDS SPECIFY FILE IN PNG FORMAT" R);
 	size = width * height * channels;
-	checksize();
+	__check_size();
 }
 image::image(int _width, int _height) : width(_width), height(_height) {
 	size  = width * height * channels;
 	alloc = true;
 	data  = static_cast<data_t*>(calloc(size, 1));
-	checksize();
+	__check_size();
 }
 
 image::image(const image& other) : image(other.width, other.height) {
-	memcpy(data, other.data, size);
+	memcpy(data, other.data, other.size);
 }
 
 image::image(image&& other) noexcept {
 	*this = move(other);
-	checksize();
+	__check_size();
 }
 
 image& image::operator=(const image& other) {
@@ -50,12 +53,15 @@ image& image::operator=(image&& other) noexcept {
 	width	   = other.width;
 	height	   = other.height;
 	data	   = other.data;
+	size	   = other.size;
+	nofree	   = other.nofree;
+	alloc	   = other.alloc;
 	other.data = nullptr;
 	return *this;
 }
 
 image::~image() {
-	if (data) {
+	if (data && !nofree) {
 		if (alloc) free(data);
 		else
 			stbi_image_free(data);
@@ -121,6 +127,8 @@ void image::WriteAtIfAlpha(int at_x, int at_y, const image& img) const {
 	int	   m_height	   = min(height - at_y, img.height);
 	CXX_WriteIfAlpha(img_data, where_start, img.width, width, m_height);
 }
-void image::checksize() const {
+void image::__check_size() const {
 	if (size < 0) fatal(RED, "Internal error: Image size may not be less than zero!" R);
 }
+
+} // namespace gsmq

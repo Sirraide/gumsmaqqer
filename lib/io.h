@@ -16,6 +16,8 @@
 #include <cstring>
 #include <vector>
 
+namespace gsmq {
+
 namespace io {
 
 enum class filemode {
@@ -374,4 +376,5 @@ template <filemode FM = M,
 			char_type_t>::type* = nullptr>
 #endif
 
+} // namespace gsmq
 #endif // CXXCOMP_FILE_H

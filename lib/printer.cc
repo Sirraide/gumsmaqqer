@@ -1,9 +1,10 @@
 #include "printer.h"
 
-#include "../lib/emojis.h"
+#include "../lib/gsmq.h"
 
 #include <string>
 using namespace std;
+namespace gsmq {
 
 namespace Textual {
 block& block::operator+=(u32string& ustr) {
@@ -25,8 +26,8 @@ block& block::operator+=(const block& b) {
 }
 
 char32_t LoadLetter(const string& which) {
-	if (!Letters::sgtf.contains(which)) fatal(RED_BOLD, "INVALID GUMSMAQ \"" RED + which + RED_BOLD "\"");
-	return Letters::sgtf.at(which);
+	if (!gsmq::__sgtf.contains(which)) fatal(RED_BOLD, "INVALID GUMSMAQ \"" RED + which + RED_BOLD "\"");
+	return gsmq::__sgtf.at(which);
 }
 
 tuple<block, int, int> LetterGroup(const letter_group_t& lg, int letters_to_print, int sublines, bool indented) {
@@ -156,3 +157,5 @@ u32string Text(const vector_t& groups) {
 }
 
 } // namespace Textual
+
+} // namespace gsmq

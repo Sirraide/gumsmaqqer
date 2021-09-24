@@ -1,3 +1,8 @@
-cmake-build-debug/
-cmake-build-release/
 build/
+build-d/
+gumsmaqqer
+gumsmaqqer.exe
+gsmq.so
+gsmq.dll
+generate-spritesheets
+generate-spritesheets.exe

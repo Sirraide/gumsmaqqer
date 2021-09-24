@@ -1,19 +1,33 @@
 #include "renderer.h"
 
-#include "../lib/emojis.h"
-#include "../lib/utils.h"
+#include "../lib/gsmq.h"
 
 #include <cctype>
 #include <sstream>
 #include <stdexcept>
 #include <unordered_map>
 using namespace std;
-
-namespace Visual {
+namespace gsmq::Visual {
 #define CONTINUE          \
 	if (it == end) break; \
 	else                  \
 		continue
+
+unordered_map<string, image> cached_letters;
+
+void LoadAtlas(unsigned char* __atlas, const char** __index, const size_t __index_len) {
+	for (size_t __i = 0; __i < __index_len; __i++) {
+		image __img(GUMSMAQ_LOGOGRAM_WIDTH, GUMSMAQ_LOGOGRAM_HEIGHT);
+		__img.data	 = __atlas + __i * __img.size;
+		__img.nofree = true;
+		string __s(__index[__i]);
+
+		cached_letters[__s]		   = move(__img);
+		cached_letters[__s].nofree = true;
+		__img.nofree			   = true;
+	}
+}
+
 vector_t VectorFromAbbr(const string& str) {
 	vector_t   ret;
 	string	   buf;
@@ -39,11 +53,10 @@ vector_t VectorFromAbbr(const string& str) {
 }
 
 const image& LoadLetter(const string& which) {
-	static unordered_map<string, image> cached_letters;
 	if (!cached_letters.contains(which)) {
-		if (!Letters::sgtf.contains(which)) fatal(RED_BOLD, "INVALID GUMSMAQ \"" RED + which + RED_BOLD "\"");
+		if (!gsmq::__sgtf.contains(which)) fatal(RED_BOLD, "INVALID GUMSMAQ \"" RED + which + RED_BOLD "\"");
 		stringstream stream;
-		stream << hex << (int) Letters::sgtf.at(which);
+		stream << hex << (int) gsmq::__sgtf.at(which);
 		string img_path = assets_dir + stream.str() + ".png";
 		image  letter(img_path);
 		cached_letters.insert({which, move(letter)});
@@ -205,4 +218,4 @@ image Paragraph(const vector_t& groups) {
 }
 #undef max_count
 
-} // namespace Visual
+} // namespace gsmq::Visual

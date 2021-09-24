@@ -11,20 +11,18 @@ file(GLOB GUMSMAQQER_SRC
         src/*.S
         )
 
-#file(GLOB TOOLS_SPRITESHEET_SRC
-#        tools/spritesheet.cc
-#        )
-
 file(GLOB LIB
         lib/*.cc
         lib/*.h)
 
+if (NOT APPLE)
+    set(CMAKE_INSTALL_RPATH $ORIGIN)
+endif ()
+
 add_library(gumsmaq SHARED ${LIB})
 add_executable(gumsmaqqer ${GUMSMAQQER_SRC})
-#add_executable(generate-spritesheets ${TOOLS_SPRITESHEET_SRC})
 
 target_link_libraries(gumsmaqqer gumsmaq)
-#target_link_libraries(generate-spritesheets gumsmaq)
 
 if (WIN32)
     target_compile_definitions(gumsmaqqer PRIVATE EXECUTABLE_NAME="gumsmaqqer.exe")

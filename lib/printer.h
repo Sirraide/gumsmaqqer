@@ -1,10 +1,12 @@
 #ifndef GUMSMAQQER_PRINTER_H
 #define GUMSMAQQER_PRINTER_H
 #include "renderer.h"
-#include "../lib/utils.h"
 
 #include <iostream>
 #include <vector>
+
+namespace gsmq {
+
 namespace Textual {
 using letter_group_t = std::pair<std::string, int>;
 using vector_t		 = std::vector<letter_group_t>;
@@ -27,4 +29,5 @@ char32_t LoadLetter(const std::string& which);
 
 }; // namespace Textual
 
+} // namespace gsmq
 #endif // GUMSMAQQER_PRINTER_H

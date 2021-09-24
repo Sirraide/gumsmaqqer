@@ -2,10 +2,7 @@
 #	include "windows.h"
 #endif
 
-#include "../lib/io.h"
-#include "../lib/utils.h"
-#include "printer.h"
-#include "renderer.h"
+#include "../lib/gsmq.h"
 #include "version.h"
 
 #define GUMSMAQQER_MAJOR_VERSION 1
@@ -20,6 +17,7 @@
 #include <cstring>
 #include <filesystem>
 using namespace std;
+using namespace gsmq;
 
 bool collect		 = false;
 bool collect_files	 = false;
@@ -30,7 +28,6 @@ bool verbose		 = false;
 bool to_file		 = false;
 bool do_reset_colour = true;
 
-string		assets_dir;
 string		ofilename;
 io::infile* infile;
 string		input_text;
@@ -245,40 +242,19 @@ int main(int argc, char** argv) {
 	EnableVirtualTerminalProcessing();
 #endif
 
-	if (filesystem::exists("./twemoji/assets/72x72")) assets_dir = "./twemoji/assets/72x72";
-	else if (filesystem::exists("./assets/72x72"))
-		assets_dir = "./assets/72x72";
-	else if (filesystem::exists("./assets"))
-		assets_dir = "./assets";
-	else if (filesystem::exists("./72x72"))
-		assets_dir = "./72x72";
-	else {
-		char* _assets_dir = std::getenv("GUMSMAQQER_ASSETS_DIR");
-#ifndef WIN32
-		string pwd{filesystem::current_path().c_str()};
-#else
-		string pwd;
-		pwd.reserve(100000);
-		wcstombs(pwd.data(), filesystem::current_path().c_str(), 100000);
-#endif
-		if (!_assets_dir) fatal(RED, string("GUMSMAQQING ASSETS FOUND WANTING\nENSURE EXISTENCE OF ASSETS DIRECTORY " Y
-											"assets" RED " CONTAINING ASSETS IN " Y)
-										 + pwd + RED "\nELSE MUST NEEDS SET ENVIRONMENT VARIABLE " Y "GUMSMAQQER_ASSETS_DIR" //
-										 RED " TO ASSETS DIRECTORY CONTAINING ASSETS");
-		assets_dir = _assets_dir;
-	}
-
-	if (!assets_dir.ends_with('/')) assets_dir += '/';
-
+	FindGumsmaqqingAssets();
 	HandleArguments(argc, argv);
 
-	auto sgtf = input_text.empty() ? infile->mmap() : input_text;
+	auto _sgtf = input_text.empty() ? infile->mmap() : input_text;
 
-	for (const auto c : sgtf) {
+	for (const auto c : _sgtf) {
 		if (isspace(c)) fatal(RED, "HERETICALLY UNCONJOINED GUMSMAQ SHALL NOT BE TOLERATED");
 	}
 
-	auto gumsmaq = Visual::VectorFromAbbr(sgtf);
+	//gsmq::Visual::LoadAtlas((unsigned char*) __atlas, (const char**)__atlas_index, __atlas_index_count);
+
+	auto gumsmaq = Visual::VectorFromAbbr(_sgtf);
+
 
 	if (textual_mode) {
 		auto text = ToUTF8(Textual::Text(gumsmaq));

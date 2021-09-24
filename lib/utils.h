@@ -7,6 +7,8 @@
 #include <iostream>
 #include <string>
 
+namespace gsmq {
+
 #define Y		 "\033[33m"
 #define B		 "\033[36m"
 #define M		 "\033[35m"
@@ -62,19 +64,13 @@ GUMSMAQ_NORETURN inline void fatal(const std::string& colour, const std::string&
 }
 #endif
 
-extern int gumsmaq_max_letter_group_count;
-extern int gumsmaq_max_line_count;
-extern int gumsmaq_letter_kern;
-extern int gumsmaq_group_indent_count;
-extern int gumsmaq_inter_block_space;
-extern int gumsmaq_max_block_count;
-
-extern std::string assets_dir;
-
 void		reset_colour();
 int			Number(const char* arg);
 void		SetText(std::string& what, const char* arg);
 std::string RemoveColour(std::string& str);
 std::string ToUTF8(const std::u32string& what);
+void __find_raw_assets();
+
+} // namespace gsmq
 
 #endif // GUMSMAQQER_UTILS_H

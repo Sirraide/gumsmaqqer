@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+namespace gsmq {
+
 using data_t = unsigned char;
 
 #ifdef WIN32
@@ -29,7 +31,8 @@ struct image {
 	static constexpr const int channels = 4;
 	int						   size		= 0;
 	data_t*					   data{};
-	bool					   alloc = false;
+	bool					   alloc  = false;
+	bool					   nofree = false;
 
 	explicit image(const std::string& filename);
 	explicit image(int width = 0, int height = 0);
@@ -43,12 +46,13 @@ struct image {
 	void WriteAtIfAlpha(int at_x, int at_y, const image& rows) const;
 	void alpha(data_t opacity = 255);
 
-	void checksize() const;
+	void __check_size() const;
 
 	[[nodiscard]] pixel* begin() const;
 	[[nodiscard]] pixel* end() const;
 
 	~image();
 };
+} // namespace gsmq
 
 #endif // GUMSMAQQER_IMAGE_H
