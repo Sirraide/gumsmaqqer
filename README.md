@@ -12,6 +12,6 @@ Place that folder into the same directory as the gumsmaqqer executable. Alternat
 First, clone the repo. Then:
 
 Linux: Run `./build.sh`.\
-Windows: Use Visual Studio.
+Windows:\* Use Visual Studio.
 
-PS: You will get warnings on Windows because Windows is Windows.
+\*You will get warnings on Windows because Windows is Windows. Also, this project uses a shared library, so er, good luck!
