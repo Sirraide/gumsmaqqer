@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
+
 project(gumsmaqqer CXX C ASM)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -19,7 +20,11 @@ if (NOT APPLE)
     set(CMAKE_INSTALL_RPATH $ORIGIN)
 endif ()
 
+if(WIN32)
+add_library(gumsmaq STATIC ${LIB})
+else()
 add_library(gumsmaq SHARED ${LIB})
+endif()
 add_executable(gumsmaqqer ${GUMSMAQQER_SRC})
 
 target_link_libraries(gumsmaqqer gumsmaq)
@@ -52,7 +57,7 @@ else ()
     else ()
         add_compile_options(-O3)
     endif ()
-    add_compile_options(-Wall -Wextra -Wundef -Wno-missing-field-initializers -Wno-sign-compare)
+    add_compile_options(-Wall -Wextra -Wundef -Wno-missing-field-initializers -Wno-sign-compare -Xlinker force)
 endif ()
 
 if (WIN32)

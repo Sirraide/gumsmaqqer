@@ -16,4 +16,4 @@ Windows:\* Use Visual Studio.
 
 Keep in mind that there are releases for a reason. The git version is not guaranteed to compile!
 
-\*You will get warnings on Windows because Windows is Windows. Also, this project uses a shared library, so er, good luck!
+\*You will get warnings on Windows because Windows is Windows. Also, I recommend using clang.
