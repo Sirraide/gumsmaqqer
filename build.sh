@@ -23,11 +23,16 @@ set -eu
 
 if [[ $# -gt 0 ]]; then
 	if [[ "$1" == "install" ]]; then
-	  	[[ $EUID -ne 0 ]] 	  || die 'ERROR: MUST NEEDS EXECUTE SCRIPT AS ROOT WHEN USING \033[33minstall\033[31m!'
-	  	[[ -e 'gumsmaqqer' ]] || die 'ERROR: MUST NEEDS COMPILE THE GUMSMAQQER BEFORE INSTALLATION.\nDO RUN \033[33m./build.sh\033[31m WITHOUT ANY ARGUMENTS!'
+	  	if [[ $EUID -ne 0 ]]; then 
+			die 'ERROR: MUST NEEDS EXECUTE SCRIPT AS ROOT WHEN USING \033[33minstall\033[31m!'
+		fi
+	  	if [ ! -f 'gumsmaqqer' ]; then 
+			die 'ERROR: MUST NEEDS COMPILE THE GUMSMAQQER BEFORE INSTALLATION.\nDO RUN \033[33m./build.sh\033[31m WITHOUT ANY ARGUMENTS!'
+		fi
 
 	  	chmod +x gumsmaqqer
 	  	cp gumsmaqqer /bin/gumsmaqqer
+		cp libgumsmaq.so /lib/libgumsmaq.so
 	  	info 'IMPORTANT: MUST NEEDS CREATE ENVIRONMENT VARIABLE \033[32mGUMSMAQQER_ASSETS_DIR\033[33m POINTING TO ASSETS FOLDER CONTAINING ASSETS!'
 	  	exit
   	fi
