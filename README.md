@@ -3,6 +3,8 @@ This is the GUMSMAQQER
 
 **IF YOU HAVE NO IDEA WHAT THIS IS**, ~~consider yourself lucky~~, look up ‘Agma Schwa’ on YouTube and search for 'Gumsmaq'.
 
+Also, look at the source code at your own risk—this is not meant to be a well-written program.
+
 ## Emojis
 You need the `assets` folder from https://github.com/twitter/twemoji  
 
